@@ -39,12 +39,17 @@ function SessionSuccessContent() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl text-primary font-bebas tracking-wide">Payment Received!</h1>
-            <p className="text-xl md:text-2xl text-foreground/80 italic">
-              Your session has been successfully booked.
-            </p>
-          </div>
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl text-primary font-bebas tracking-wide">Payment Received!</h1>
+              <p className="text-xl md:text-2xl text-foreground/80 italic">
+                Your sacred session has been successfully booked.
+              </p>
+              <div className="flex justify-center items-center gap-2 text-primary/60">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm uppercase tracking-[0.2em] font-serif">Divine Appointment Confirmed</span>
+                <Sparkles className="h-4 w-4" />
+              </div>
+            </div>
 
           {sessionData && (
             <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10 space-y-4 text-left">
