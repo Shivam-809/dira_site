@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Package, Truck, Sparkles, ShoppingBag } from "lucide-react";
+import { CheckCircle2, Package, Truck, Sparkles, ShoppingBag, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,14 +11,31 @@ import Footer from "@/components/Footer";
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const [orderData, setOrderData] = useState<any>(null);
+  const [trackingHistory, setTrackingHistory] = useState<any[]>([]);
   const orderId = searchParams.get("orderId");
 
   useEffect(() => {
     if (orderId) {
+      // Fetch order details
       fetch(`/api/orders?id=${orderId}`)
         .then((res) => res.json())
         .then((data) => setOrderData(data))
         .catch((err) => console.error("Error fetching order details:", err));
+
+      // Fetch tracking details
+      const token = localStorage.getItem("bearer_token");
+      fetch(`/api/orders/tracking?orderId=${orderId}`, {
+        headers: {
+          ...(token && { "Authorization": `Bearer ${token}` }),
+        }
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setTrackingHistory(data);
+          }
+        })
+        .catch((err) => console.error("Error fetching tracking details:", err));
     }
   }, [orderId]);
 
@@ -44,6 +61,11 @@ function CheckoutSuccessContent() {
             <p className="text-xl md:text-2xl text-foreground/80 italic">
               Thank you for your purchase. Your sacred items are being prepared.
             </p>
+            <div className="flex justify-center items-center gap-2 text-primary/60">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-sm uppercase tracking-[0.2em] font-serif">Order Confirmed</span>
+              <Sparkles className="h-4 w-4" />
+            </div>
           </div>
 
           {orderData && (
@@ -59,40 +81,58 @@ function CheckoutSuccessContent() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-1">
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <Truck className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Tracking Details</h3>
-                    <p className="text-sm text-muted-foreground italic mb-2">
-                        Your order is currently in processing. Tracking information will be updated as soon as your package is dispatched.
-                    </p>
-                    <div className="bg-background/50 rounded-lg p-3 border border-dashed border-primary/20 text-xs">
-                        <p className="flex justify-between mb-1">
-                            <span>Status:</span>
-                            <span className="text-primary font-semibold uppercase">Processing</span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground text-lg mb-1">Tracking Details</h3>
+                    
+                    {trackingHistory.length > 0 ? (
+                      <div className="space-y-4 mt-3">
+                        {trackingHistory.map((step, index) => (
+                          <div key={step.id} className="relative pl-6 pb-2 border-l border-primary/20 last:border-0 last:pb-0">
+                            <div className="absolute left-[-5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
+                            <p className="text-sm font-semibold text-foreground capitalize">{step.status}</p>
+                            <p className="text-xs text-muted-foreground">{step.description}</p>
+                            {step.location && <p className="text-[10px] text-primary/70">{step.location}</p>}
+                            <p className="text-[10px] text-muted-foreground font-mono mt-1">
+                              {new Date(step.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-background/50 rounded-xl p-4 border border-dashed border-primary/20 space-y-3">
+                        <div className="flex items-center gap-2 text-primary">
+                          <Clock className="h-4 w-4" />
+                          <span className="text-sm font-semibold uppercase tracking-wider">Processing</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground italic leading-relaxed">
+                          Your order has been placed successfully and is now moving into our preparation phase. 
+                          We will update your tracking details once your items are blessed and dispatched.
                         </p>
-                        <p className="flex justify-between">
-                            <span>Expected Dispatch:</span>
-                            <span>Within 24-48 hours</span>
-                        </p>
-                    </div>
+                        <div className="pt-2 border-t border-primary/5">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.1em]">Expected Dispatch: <span className="text-foreground">Within 24-48 hours</span></p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-1">
+                <div className="flex items-start gap-4 pt-4 border-t border-primary/5">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <Package className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Shipping To</h3>
-                    <p className="text-sm text-muted-foreground">
-                        {orderData.shippingAddress?.name}<br />
-                        {orderData.shippingAddress?.address}<br />
-                        {orderData.shippingAddress?.city}, {orderData.shippingAddress?.state} {orderData.shippingAddress?.zip}
-                    </p>
+                    <h3 className="font-semibold text-foreground text-lg mb-1">Shipping To</h3>
+                    <div className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="font-medium text-foreground">{orderData.shippingAddress?.name}</p>
+                        <p>{orderData.shippingAddress?.address}</p>
+                        <p>{orderData.shippingAddress?.city}, {orderData.shippingAddress?.state} {orderData.shippingAddress?.zip}</p>
+                        <p className="uppercase tracking-widest text-[10px] mt-1">{orderData.shippingAddress?.country}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -100,13 +140,13 @@ function CheckoutSuccessContent() {
           )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link href="/orders">
-              <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-xl px-10">
+            <Link href="/orders" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-xl px-10 py-7">
                 View My Orders
               </Button>
             </Link>
-            <Link href="/shop">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary/30 hover:bg-primary/5 font-bebas text-xl px-10">
+            <Link href="/shop" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full border-primary/30 hover:bg-primary/5 font-bebas text-xl px-10 py-7">
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Continue Shopping
               </Button>
