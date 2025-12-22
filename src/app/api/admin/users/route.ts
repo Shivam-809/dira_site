@@ -100,11 +100,11 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const authCheck = await checkAdminAuth(request);
-    if (!authCheck.authorized) {
+    const authCheck = await verifyAdminRequest(request);
+    if (authCheck.error) {
       return NextResponse.json(
-        { error: authCheck.error, code: authCheck.code },
-        { status: authCheck.status }
+        { error: authCheck.error },
+        { status: authCheck.status || 401 }
       );
     }
 
