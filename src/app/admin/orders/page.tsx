@@ -7,10 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Package, Loader2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Package, Loader2, Search, ChevronLeft, ChevronRight, Trash2, Eye, Truck, CreditCard, User } from "lucide-react";
 import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 
 interface Order {
   id: number;
@@ -28,6 +39,169 @@ interface Order {
     zipCode?: string;
     country: string;
   };
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+}
+
+export default function AdminOrdersPage() {
+  const router = useRouter();
+  const [adminSession, setAdminSession] = useState<{ id: number; name: string; email: string } | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Verify admin session
+  useEffect(() => {
+    const verifyAdminSession = async () => {
+      const token = localStorage.getItem("admin_token");
+      
+      if (!token) {
+        toast.error("Please login as admin");
+        router.push("/admin/login");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/admin/auth/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem("admin_token");
+          toast.error("Session expired. Please login again.");
+          router.push("/admin/login");
+          return;
+        }
+
+        const data = await response.json();
+        setAdminSession(data.admin);
+        setSessionLoading(false);
+      } catch (error) {
+        console.error("Session verification failed:", error);
+        localStorage.removeItem("admin_token");
+        toast.error("Session verification failed. Please login again.");
+        router.push("/admin/login");
+      }
+    };
+
+    verifyAdminSession();
+  }, [router]);
+
+  useEffect(() => {
+    if (adminSession) {
+      fetchOrders();
+    }
+  }, [adminSession, statusFilter, searchQuery]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const params = new URLSearchParams({ limit: "100" });
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (searchQuery) params.append("search", searchQuery);
+
+      const response = await fetch(`/api/admin/orders?${params}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      } else {
+        toast.error("Failed to load orders");
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch("/api/admin/orders", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+
+      if (response.ok) {
+        toast.success("Order status updated!");
+        fetchOrders();
+      } else {
+        toast.error("Failed to update order status");
+      }
+    } catch (error) {
+      toast.error("Failed to update order status");
+    }
+  };
+
+  const handleDeleteRequest = (order: Order) => {
+    setSelectedOrder(order);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`/api/admin/orders?orderId=${selectedOrder.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Order deleted successfully!");
+        fetchOrders();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Failed to delete order");
+      }
+    } catch (error) {
+      toast.error("Failed to delete order");
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedOrder(null);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      pending: "bg-yellow-500",
+      paid: "bg-green-500",
+      shipped: "bg-blue-500",
+      delivered: "bg-purple-500",
+      cancelled: "bg-red-500",
+    };
+    return colors[status] || "bg-gray-500";
+  };
+
   createdAt: string;
   user?: {
     id: string;
