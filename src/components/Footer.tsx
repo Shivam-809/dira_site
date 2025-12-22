@@ -7,14 +7,16 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-                <Link href="/" className="inline-block h-20">
-                  <Image 
-                    src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
-                    alt="Dira Logo" 
-                    width={80} 
-                    height={80} 
-                    className="h-full w-auto object-contain scale-125 origin-left"
-                  />
+                <Link href="/" className="inline-block">
+                  <div className="h-12 w-12 rounded-full overflow-hidden border border-primary/10 shadow-sm">
+                    <Image 
+                      src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
+                      alt="Dira Logo" 
+                      width={48} 
+                      height={48} 
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 </Link>
 
               <p className="text-base font-serif italic text-muted-foreground max-w-xs">
