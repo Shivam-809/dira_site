@@ -215,3 +215,62 @@ export async function PUT(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const adminCheck = await verifyAdminRequest(request);
+    if (adminCheck.error) {
+      return NextResponse.json({ error: adminCheck.error }, { status: adminCheck.status || 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const orderId = searchParams.get('orderId');
+
+    if (!orderId) {
+      return NextResponse.json({ 
+        error: 'Order ID is required', 
+        code: 'MISSING_ORDER_ID' 
+      }, { status: 400 });
+    }
+
+    const orderIdNum = parseInt(orderId);
+    if (isNaN(orderIdNum)) {
+      return NextResponse.json({ 
+        error: 'Valid order ID is required', 
+        code: 'INVALID_ORDER_ID' 
+      }, { status: 400 });
+    }
+
+    // Check if order exists
+    const existingOrder = await db.select()
+      .from(orders)
+      .where(eq(orders.id, orderIdNum))
+      .limit(1);
+
+    if (existingOrder.length === 0) {
+      return NextResponse.json({ 
+        error: 'Order not found', 
+        code: 'ORDER_NOT_FOUND' 
+      }, { status: 404 });
+    }
+
+    // Delete order tracking info first
+    // In src/db/schema.ts, orderTracking references orders.id
+    // Note: Better check if orderTracking exists and is defined
+    const { orderTracking } = await import('@/db/schema');
+    if (orderTracking) {
+      await db.delete(orderTracking).where(eq(orderTracking.orderId, orderIdNum));
+    }
+
+    // Delete the order
+    await db.delete(orders).where(eq(orders.id, orderIdNum));
+
+    return NextResponse.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('DELETE error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error: ' + (error instanceof Error ? error.message : 'Unknown error'),
+      code: 'INTERNAL_ERROR'
+    }, { status: 500 });
+  }
+}
