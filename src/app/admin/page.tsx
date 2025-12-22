@@ -15,11 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Plus, Edit, Trash2, Loader2, Shield, Users, Package, DollarSign, Clock, ShoppingBag, UserCog, Upload, X } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Shield, Users, Package, DollarSign, Clock, ShoppingBag, UserCog, Upload, X, ArrowUpRight, TrendingUp, Inbox } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Separator } from "@/components/ui/separator";
 
 const productSchema = z.object({
   name: z.string().min(2, "Product name is required"),
