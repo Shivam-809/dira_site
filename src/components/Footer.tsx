@@ -7,8 +7,8 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-                <Link href="/" className="inline-block">
-                  <div className="h-12 w-12 rounded-full overflow-hidden border border-primary/10 shadow-sm">
+                <Link href="/" className="flex items-center gap-3 group">
+                  <div className="h-12 w-12 rounded-full overflow-hidden border border-primary/10 shadow-sm flex-shrink-0">
                     <Image 
                       src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
                       alt="Dira Logo" 
@@ -16,6 +16,14 @@ export default function Footer() {
                       height={48} 
                       className="h-full w-full object-cover"
                     />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xl font-serif tracking-tight text-primary leading-none">
+                      Dira
+                    </span>
+                    <span className="text-xs font-felipa text-primary/80 leading-tight mt-0.5">
+                      Sakalya Wellbeing
+                    </span>
                   </div>
                 </Link>
 
