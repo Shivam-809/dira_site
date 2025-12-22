@@ -6,12 +6,18 @@ import { Toaster } from "@/components/ui/sonner";
 import AiChatbot from "@/components/AiChatbot";
 import CredentialCleaner from "@/components/CredentialCleaner";
 import FloatingBackground from "@/components/FloatingBackground";
-import { Bebas_Neue, Mrs_Saint_Delafield, Montserrat } from 'next/font/google';
+import { Bebas_Neue, Mrs_Saint_Delafield, Montserrat, Felipa } from 'next/font/google';
 
 const bebasNeue = Bebas_Neue({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-bebas-neue',
+});
+
+const felipa = Felipa({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-felipa',
 });
 
 const mrsSaintDelafield = Mrs_Saint_Delafield({
