@@ -2,58 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { contactMessages } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { adminSession, admin } from '@/db/schema';
-
-async function verifyAdminAccess(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return { error: NextResponse.json({ error: 'Admin token required', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    const token = authHeader.substring(7);
-
-    // Verify admin session token
-    const sessions = await db.select()
-      .from(adminSession)
-      .where(eq(adminSession.token, token))
-      .limit(1);
-
-    if (sessions.length === 0) {
-      return { error: NextResponse.json({ error: 'Invalid admin token', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    const session = sessions[0];
-
-    // Check if session has expired
-    const expiresAt = new Date(session.expiresAt);
-    if (expiresAt < new Date()) {
-      return { error: NextResponse.json({ error: 'Admin session expired', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    // Get admin details
-    const admins = await db.select()
-      .from(admin)
-      .where(eq(admin.id, session.adminId))
-      .limit(1);
-
-    if (admins.length === 0) {
-      return { error: NextResponse.json({ error: 'Admin not found', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    return { admin: admins[0], session };
-  } catch (error) {
-    return { error: NextResponse.json({ error: 'Authentication failed', code: 'AUTH_ERROR' }, { status: 401 }) };
-  }
-}
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
     // Admin authentication
-    const adminCheck = await verifyAdminAccess(request);
+    const adminCheck = await verifyAdminRequest(request);
     if (adminCheck.error) {
-      return adminCheck.error;
+      return NextResponse.json({ error: adminCheck.error }, { status: adminCheck.status || 401 });
     }
 
     const { searchParams } = new URL(request.url);
