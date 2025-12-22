@@ -118,13 +118,13 @@ function HomeContent() {
                   I’m Dr. Diksha Malhotra, PT — a Twin Flame Coach, Tarot Card Reader, Reiki Grandmaster, and Angel Healer.
                 </p>
                 <p>
-                  For over 6 years, I’ve supported individuals across the world who find themselves in emotionally intense phases of life — especially those walking the Twin Flame journey. My work is centered on bringing clarity where there is confusion, grounding where there is emotional overwhelm, and healing where patterns keep repeating.
+                  For over 6 years, I’ve supported individuals across the world through emotionally intense phases of life — especially those navigating the Twin Flame journey. My work focuses on bringing clarity where there is confusion, stability where there is emotional overwhelm, and healing where patterns keep repeating.
                 </p>
                 <p>
-                  With 12,000+ accurate and successful readings, I’ve helped people move from uncertainty into self-awareness, emotional regulation, and conscious alignment. I don’t offer rigid predictions or dependency-based guidance — I offer truthful insight, energetic healing, and grounded direction so you can move forward with confidence.
+                  With 12,000+ accurate and successful readings, I’ve helped people move from uncertainty into self-awareness, emotional regulation, and conscious alignment. I don’t offer rigid predictions or dependency-based guidance — I offer clear insight, ethical guidance, and deep healing, so you can move forward with confidence and self-trust.
                 </p>
                 <p className="italic text-primary/70">
-                  This space exists for those who are ready to understand themselves more deeply and realign with their soul path.
+                  This space is for those who are ready to understand themselves more deeply and realign with their soul path.
                 </p>
               </div>
               <div className="flex justify-center pt-4">
@@ -165,28 +165,28 @@ function HomeContent() {
                 
                 <div className="space-y-6 text-lg font-serif italic text-muted-foreground leading-relaxed">
                   <p>
-                    My journey into healing and intuitive work began with awareness long before formal training. Over time, that sensitivity evolved into disciplined mastery through study, practice, and lived experience. Each stage of my path marked a milestone of understanding universal laws, energetic dynamics, and soul evolution.
+                    My journey into healing and intuitive work began with awareness long before it had a name. Over time, that sensitivity evolved into disciplined mastery through years of study, practice, and lived experience. Each phase of my path became a milestone in understanding universal laws, energetic intelligence, and soul evolution.
                   </p>
                   <p>
-                    As a physiotherapist (PT), I bring a grounded, body-based understanding into my spiritual work. This allows me to address healing at multiple levels — physical, emotional, subconscious, ancestral, and energetic — while keeping every session safe, ethical, and integrative.
+                    Alongside my work as a physiotherapist (PT), I integrate a strong body–mind foundation into my spiritual practice. This allows me to work safely across physical, emotional, subconscious, ancestral, and energetic layers, creating sessions that are grounded, integrative, and ethically held.
                   </p>
                   <p>
-                    As a Reiki Grandmaster and Angel Healer, I work with Reiki, hypnosis, and candle rituals to release stored emotional trauma, subconscious blocks, and energetic stagnation. My sessions often include inner child healing and ancestral trauma healing, helping clients break inherited emotional cycles and reconnect with a sense of safety and self-worth.
+                    As a Reiki Grandmaster and Angel Healer, I work with Reiki, hypnosis, candle rituals, subconscious reprogramming, and NLP-based techniques to help release emotional trauma, limiting belief systems, and deeply ingrained patterns. My sessions often include inner child healing and ancestral trauma healing, supporting clients in breaking inherited emotional cycles and restoring inner safety.
                   </p>
                   <p>
-                    Through tarot, angel communication, intuition-led guidance, dowsing, runes, and soul scanning, I translate subtle energies into grounded insight. I also work with numerology, astrology, palm reading, and coffee cup reading, using symbolic systems to reveal timing, soul themes, personality patterns, and life cycles.
+                    Through tarot, angel communication, intuition-led guidance, dowsing, runes, and soul scanning, I translate subtle energetic information into grounded, practical insight. I also work with numerology, astrology, palm reading, coffee cup reading, and Human Design, helping clients understand their energetic blueprint, life themes, timing cycles, and decision-making patterns.
                   </p>
                   <p>
-                    My work extends into past-life regression and Akashic readings, where karmic patterns, soul contracts, and repeating lessons across lifetimes become visible and ready for healing. These practices are guided by my understanding of free will, cause and effect, energetic balance, and conscious choice.
+                    My work extends into past-life regression and Akashic readings, where karmic imprints, soul contracts, and recurring lessons across lifetimes become visible and ready for healing. These practices are guided by my understanding of free will, cause and effect, energetic balance, and conscious choice — never fear or dependency.
                   </p>
                   <p>
-                    My intuitive and psychic abilities include claircognizance (clear knowing), clairsentience (feeling emotional and energetic imprints), intuitive perception, and multidimensional energy scanning. These abilities are used consciously and ethically, always with respect for personal autonomy.
+                    My intuitive and psychic abilities include claircognizance (clear knowing), clairsentience (emotional and energetic sensitivity), intuitive perception, and multidimensional energy scanning. These abilities are used consciously and responsibly, always respecting personal autonomy.
                   </p>
                   <p className="text-primary font-medium border-l-2 border-primary/20 pl-6 py-2">
-                    I don’t guide people to chase outcomes or union — I guide them to heal, align, and trust themselves, because lasting transformation begins within.
+                    I don’t guide people to chase outcomes or union. I guide them to heal, align, and trust themselves — because true transformation and union are natural outcomes of inner harmony.
                   </p>
                   <p>
-                    If you’ve arrived here, it’s because something within you is ready to be acknowledged and understood. I’m here to help you listen.
+                    If you’ve arrived here, it’s because something within you is ready to be seen, understood, and integrated. I’m here to help you listen.
                   </p>
                 </div>
               </div>
