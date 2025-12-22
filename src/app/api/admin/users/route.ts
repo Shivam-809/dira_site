@@ -178,3 +178,52 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const authCheck = await verifyAdminRequest(request);
+    if (authCheck.error) {
+      return NextResponse.json(
+        { error: authCheck.error },
+        { status: authCheck.status || 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required', code: 'MISSING_USER_ID' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists
+    const existingUser = await db.select()
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    if (existingUser.length === 0) {
+      return NextResponse.json(
+        { error: 'User not found', code: 'USER_NOT_FOUND' },
+        { status: 404 }
+      );
+    }
+
+    // Delete related data first if necessary (sessions, accounts, etc.)
+    // Better-auth should handle some of this if configured, but let's be safe
+    // For now, let's just delete the user
+    await db.delete(user).where(eq(user.id, userId));
+
+    return NextResponse.json({ success: true, message: 'User deleted successfully' });
+
+  } catch (error) {
+    console.error('DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error: ' + (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
