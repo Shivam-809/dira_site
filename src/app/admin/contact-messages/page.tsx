@@ -301,7 +301,7 @@ export default function AdminContactMessagesPage() {
                   </div>
                   <h2 className="text-3xl font-black mb-1">Customer Inquiry</h2>
                   <p className="text-white/70 font-medium flex items-center gap-2">
-                    <Calendar className="h-4 w-4" /> Received on {new Date(selectedMessage.createdAt).toLocaleLongString() ?? new Date(selectedMessage.createdAt).toDateString()}
+                    <Calendar className="h-4 w-4" /> Received on {new Date(selectedMessage.createdAt).toLocaleString()}
                   </p>
                </div>
                
