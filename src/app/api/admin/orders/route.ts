@@ -134,9 +134,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const adminCheck = await verifyAdminAccess(request);
+    const adminCheck = await verifyAdminRequest(request);
     if (adminCheck.error) {
-      return adminCheck.error;
+      return NextResponse.json({ error: adminCheck.error }, { status: adminCheck.status || 401 });
     }
 
     const body = await request.json();
