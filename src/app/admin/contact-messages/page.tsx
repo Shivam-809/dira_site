@@ -3,21 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, Loader2, ArrowLeft, Eye, Trash2 } from "lucide-react";
+import { Mail, Loader2, ArrowLeft, Eye, Trash2, Inbox, Calendar, User, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 interface ContactMessage {
   id: number;
-  name: string;
-  email: string;
-  subject: string;
+  userName: string;
+  userEmail: string;
   message: string;
   status: string;
   createdAt: string;
@@ -32,6 +33,7 @@ export default function AdminContactMessagesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const verifyAdminSession = async () => {
@@ -97,8 +99,7 @@ export default function AdminContactMessagesPage() {
     setSelectedMessage(message);
     setDialogOpen(true);
 
-    // Mark as read if it's new
-    if (message.status === "new") {
+    if (message.status === "unread") {
       markAsRead(message.id);
     }
   };
@@ -154,11 +155,17 @@ export default function AdminContactMessagesPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    if (status === "new") {
-      return <Badge className="bg-blue-500">New</Badge>;
+    if (status === "unread") {
+      return <Badge className="bg-primary hover:bg-primary border-none font-bold text-[10px] uppercase">Unread</Badge>;
     }
-    return <Badge variant="secondary">Read</Badge>;
+    return <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-none font-bold text-[10px] uppercase">Read</Badge>;
   };
+
+  const filteredMessages = messages.filter(msg => 
+    msg.userName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    msg.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    msg.message.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading || sessionLoading) {
     return (
@@ -173,87 +180,105 @@ export default function AdminContactMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Navbar />
       
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="mb-8">
+      <main className="flex-1 py-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="mb-8 space-y-4">
             <Link href="/admin">
-              <Button variant="ghost" className="mb-4">
+              <Button variant="ghost" size="sm" className="mb-2 text-slate-500 hover:text-primary">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+                Dashboard
               </Button>
             </Link>
-            <h1 className="text-4xl font-bold">Contact Messages</h1>
-            <p className="text-muted-foreground mt-2">
-              View and manage messages from your customers
-            </p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+               <div>
+                  <h1 className="text-4xl font-black tracking-tight text-slate-900">Inquiries</h1>
+                  <p className="text-slate-500 font-medium">
+                    Customer support and general contact messages.
+                  </p>
+               </div>
+               <div className="relative w-full md:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input 
+                    placeholder="Search messages..." 
+                    className="pl-10 bg-white border-slate-200"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+               </div>
+            </div>
           </div>
 
-          {messages.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Mail className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h2 className="text-2xl font-semibold mb-2">No messages yet</h2>
-                <p className="text-muted-foreground">
-                  Messages from your contact form will appear here
+          {filteredMessages.length === 0 ? (
+            <Card className="border-none shadow-sm py-20 text-center bg-white">
+              <CardContent>
+                <div className="p-4 bg-slate-50 rounded-full w-fit mx-auto mb-4">
+                  <Inbox className="h-10 w-10 text-slate-300" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">Clear Inbox</h2>
+                <p className="text-slate-500">
+                  {searchQuery ? "No messages match your search" : "No customer inquiries found at the moment"}
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <Card key={message.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <CardTitle className="text-lg">{message.subject}</CardTitle>
-                          {getStatusBadge(message.status)}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span className="font-medium">{message.name}</span>
-                          <span>•</span>
-                          <span>{message.email}</span>
-                          <span>•</span>
-                          <span>
-                            {new Date(message.createdAt).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewMessage(message)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            setMessageToDelete(message.id);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+            <div className="grid gap-4">
+              {filteredMessages.map((message) => (
+                <Card 
+                  key={message.id} 
+                  className={`border-none shadow-sm transition-all hover:shadow-md cursor-pointer overflow-hidden ${message.status === 'unread' ? 'ring-1 ring-primary/20 bg-white' : 'bg-white opacity-80'}`}
+                  onClick={() => handleViewMessage(message)}
+                >
+                  <CardContent className="p-0">
+                    <div className="flex">
+                       <div className={`w-1.5 ${message.status === 'unread' ? 'bg-primary' : 'bg-transparent'}`}></div>
+                       <div className="flex-1 p-6">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                            <div className="flex items-center gap-3">
+                               <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-500 uppercase">
+                                 {message.userName.charAt(0)}
+                               </div>
+                               <div>
+                                  <p className="font-bold text-slate-900 leading-none mb-1">{message.userName}</p>
+                                  <p className="text-xs text-slate-400 font-medium">{message.userEmail}</p>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                               <div className="text-right hidden md:block">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Received</p>
+                                  <p className="text-xs font-bold text-slate-600">
+                                    {new Date(message.createdAt).toLocaleDateString()}
+                                  </p>
+                               </div>
+                               {getStatusBadge(message.status)}
+                            </div>
+                          </div>
+                          
+                          <p className="text-slate-600 text-sm line-clamp-2 italic border-l-2 border-slate-100 pl-4">
+                            "{message.message}"
+                          </p>
+                          
+                          <div className="mt-4 flex items-center justify-end gap-2">
+                             <Button variant="ghost" size="sm" className="h-8 text-xs font-bold">
+                               <Eye className="h-3.5 w-3.5 mr-1.5" /> View Full
+                             </Button>
+                             <Button 
+                               variant="ghost" 
+                               size="sm" 
+                               className="h-8 text-xs font-bold text-destructive hover:bg-destructive hover:text-white"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setMessageToDelete(message.id);
+                                 setDeleteDialogOpen(true);
+                               }}
+                             >
+                               <Trash2 className="h-3.5 w-3.5" />
+                             </Button>
+                          </div>
+                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {message.message}
-                    </p>
                   </CardContent>
                 </Card>
               ))}
@@ -264,54 +289,59 @@ export default function AdminContactMessagesPage() {
 
       {/* View Message Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedMessage?.subject}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-xl p-0 overflow-hidden border-none rounded-3xl">
           {selectedMessage && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-semibold mb-1">From</p>
-                  <p className="text-muted-foreground">{selectedMessage.name}</p>
-                </div>
-                <div>
-                  <p className="font-semibold mb-1">Email</p>
-                  <p className="text-muted-foreground">{selectedMessage.email}</p>
-                </div>
-                <div>
-                  <p className="font-semibold mb-1">Date</p>
-                  <p className="text-muted-foreground">
-                    {new Date(selectedMessage.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+            <div className="flex flex-col">
+               <div className="bg-primary p-8 text-white">
+                  <div className="flex justify-between items-start mb-6">
+                     <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl">
+                        <Mail className="h-6 w-6" />
+                     </div>
+                     {getStatusBadge(selectedMessage.status)}
+                  </div>
+                  <h2 className="text-3xl font-black mb-1">Customer Inquiry</h2>
+                  <p className="text-white/70 font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4" /> Received on {new Date(selectedMessage.createdAt).toLocaleLongString() ?? new Date(selectedMessage.createdAt).toDateString()}
                   </p>
-                </div>
-                <div>
-                  <p className="font-semibold mb-1">Status</p>
-                  {getStatusBadge(selectedMessage.status)}
-                </div>
-              </div>
+               </div>
+               
+               <div className="p-8 bg-white space-y-8">
+                  <div className="grid grid-cols-2 gap-6 pb-6 border-b border-slate-100">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <User className="h-3 w-3" /> Sender Name
+                      </p>
+                      <p className="font-bold text-slate-900">{selectedMessage.userName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <Mail className="h-3 w-3" /> Email Address
+                      </p>
+                      <p className="font-bold text-slate-900">{selectedMessage.userEmail}</p>
+                    </div>
+                  </div>
 
-              <div className="border-t pt-4">
-                <p className="font-semibold mb-2">Message</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {selectedMessage.message}
-                </p>
-              </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                      <Inbox className="h-3 w-3" /> Message Content
+                    </p>
+                    <div className="p-6 bg-slate-50 rounded-3xl text-slate-700 leading-relaxed italic relative">
+                       {selectedMessage.message}
+                    </div>
+                  </div>
 
-              <div className="flex justify-end gap-2 border-t pt-4">
-                <Button variant="outline" asChild>
-                  <a href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Reply via Email
-                  </a>
-                </Button>
-              </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button className="flex-1 rounded-2xl font-bold h-12 shadow-lg shadow-primary/20" asChild>
+                      <a href={`mailto:${selectedMessage.userEmail}?subject=Direct response from Dira Sakalya Wellbeing`}>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Compose Reply
+                      </a>
+                    </Button>
+                    <Button variant="outline" className="rounded-2xl font-bold h-12 border-slate-200" onClick={() => setDialogOpen(false)}>
+                      Dismiss
+                    </Button>
+                  </div>
+               </div>
             </div>
           )}
         </DialogContent>
@@ -319,22 +349,22 @@ export default function AdminContactMessagesPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-3xl border-none p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the message.
+            <AlertDialogTitle className="text-2xl font-black text-slate-900">Delete Message?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 font-medium">
+              This will permanently remove this customer inquiry. You won't be able to recover it later.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setMessageToDelete(null)}>
-              Cancel
+          <AlertDialogFooter className="pt-6">
+            <AlertDialogCancel className="rounded-2xl font-bold border-slate-200" onClick={() => setMessageToDelete(null)}>
+              Keep Message
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteMessage}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90 rounded-2xl font-bold"
             >
-              Delete
+              Confirm Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
