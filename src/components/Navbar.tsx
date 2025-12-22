@@ -98,12 +98,17 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between">
-                  <Link href="/" className="flex items-center space-x-2 group">
-                    <span className="text-4xl font-serif text-primary py-2 drop-shadow-sm tracking-tighter">
-                      Dira
-                    </span>
-                </Link>
+          <div className="flex h-20 items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2 group h-16">
+              <Image 
+                src="/dira-logo-new.png" 
+                alt="Dira Logo" 
+                width={150} 
+                height={60} 
+                className="h-full w-auto object-contain py-1"
+                priority
+              />
+            </Link>
 
 
               <div className="hidden md:flex items-center space-x-10 font-serif italic">

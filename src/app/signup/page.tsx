@@ -114,21 +114,16 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-primary/30">
-                  <Image
-                    src="/dira-logo-mystical.png"
-                    alt="Dira Tarot"
-                    width={48}
-                    height={48}
-                    className="h-full w-full object-cover"
-                    priority
-                  />
-                </div>
-                <span className="text-3xl font-serif text-primary tracking-tighter">
-                  Dira
-                </span>
+            <div className="flex justify-center">
+              <Link href="/">
+                <Image
+                  src="/dira-logo-new.png"
+                  alt="Dira Logo"
+                  width={140}
+                  height={60}
+                  className="h-auto w-auto"
+                  priority
+                />
               </Link>
             </div>
             <div>
@@ -194,21 +189,16 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-primary/30">
-                <Image
-                  src="/dira-logo-mystical.png"
-                  alt="Dira Tarot"
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-cover"
-                  priority
-                />
-              </div>
-              <span className="text-3xl font-serif text-primary tracking-tighter">
-                Dira Tarot
-              </span>
+          <div className="flex justify-center">
+            <Link href="/">
+              <Image
+                src="/dira-logo-new.png"
+                alt="Dira Logo"
+                width={140}
+                height={60}
+                className="h-auto w-auto"
+                priority
+              />
             </Link>
           </div>
           <div>
