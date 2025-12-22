@@ -2,29 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { user } from '@/db/schema';
 import { eq, like, or, and, desc } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
-
-async function checkAdminAuth(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: request.headers });
-  
-  if (!session) {
-    return { authorized: false, status: 401, error: 'Authentication required', code: 'UNAUTHORIZED' };
-  }
-  
-  if (session.user.role !== 'admin') {
-    return { authorized: false, status: 403, error: 'Admin access required', code: 'FORBIDDEN' };
-  }
-  
-  return { authorized: true, session };
-}
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const authCheck = await checkAdminAuth(request);
-    if (!authCheck.authorized) {
+    const authCheck = await verifyAdminRequest(request);
+    if (authCheck.error) {
       return NextResponse.json(
-        { error: authCheck.error, code: authCheck.code },
-        { status: authCheck.status }
+        { error: authCheck.error },
+        { status: authCheck.status || 401 }
       );
     }
 
