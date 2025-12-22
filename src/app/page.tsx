@@ -76,12 +76,14 @@ function HomeContent() {
                 <Moon className="h-10 w-10 text-primary/40 transform rotate-180" />
               </div>
               
-              <div className="relative inline-block">
-                <h1 className="text-8xl md:text-[12rem] leading-none mb-4">
-                  <span className="font-serif text-primary drop-shadow-sm tracking-tighter">Dira</span>
-                </h1>
-                <div className="md:absolute md:bottom-0 md:right-[-6rem] font-signature text-4xl md:text-5xl text-primary/70 mt-2 md:mt-0 lowercase italic">
-                  Sakalya Wellbeing
+              <div className="relative flex flex-col items-center">
+                <div className="relative w-80 h-80 md:w-[28rem] md:h-[28rem] mb-6 animate-float">
+                  <img 
+                    src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
+                    alt="Dira Sakalya Wellbeing Logo" 
+                    className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.2)]"
+                  />
+                  <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" />
                 </div>
               </div>
               
