@@ -17,10 +17,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Users, Loader2, Search, Shield, UserCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Loader2, Search, Shield, UserCircle, ChevronLeft, ChevronRight, Trash2, Eye, ShoppingBasket, Mail, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 
 interface User {
   id: string;
@@ -33,6 +40,13 @@ interface User {
   updatedAt: string;
 }
 
+interface UserOrder {
+  id: number;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminUsersPage() {
   const router = useRouter();
   const [adminSession, setAdminSession] = useState<{ id: number; name: string; email: string } | null>(null);
@@ -42,7 +56,11 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [userOrders, setUserOrders] = useState<UserOrder[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -121,9 +139,37 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleRoleChange = (user: User) => {
+  const handleRoleChangeRequest = (user: User) => {
     setSelectedUser(user);
-    setDialogOpen(true);
+    setRoleDialogOpen(true);
+  };
+
+  const handleDeleteRequest = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleViewDetails = async (user: User) => {
+    setSelectedUser(user);
+    setDetailsDialogOpen(true);
+    setLoadingOrders(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`/api/admin/orders?search=${user.email}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Filter strictly by user ID to be sure
+        setUserOrders(data.filter((o: any) => o.userId === user.id));
+      }
+    } catch (error) {
+      console.error("Failed to fetch user orders:", error);
+    } finally {
+      setLoadingOrders(false);
+    }
   };
 
   const confirmRoleChange = async () => {
@@ -151,9 +197,47 @@ export default function AdminUsersPage() {
     } catch (error) {
       toast.error("Failed to update user role");
     } finally {
-      setDialogOpen(false);
+      setRoleDialogOpen(false);
       setSelectedUser(null);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch(`/api/admin/users?userId=${selectedUser.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("User deleted successfully!");
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Failed to delete user");
+      }
+    } catch (error) {
+      toast.error("Failed to delete user");
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      pending: "text-amber-500",
+      paid: "text-emerald-500",
+      shipped: "text-blue-500",
+      delivered: "text-purple-500",
+      cancelled: "text-destructive",
+    };
+    return colors[status] || "text-muted-foreground";
   };
 
   // Pagination
