@@ -88,24 +88,26 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
       <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex justify-center">
-              <Link href="/">
-                <Image
-                  src="/dira-logo-new.png"
-                  alt="Dira Logo"
-                  width={140}
-                  height={60}
-                  className="h-auto w-auto"
-                  priority
-                />
-              </Link>
-            </div>
-            <div>
-              <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-              <CardDescription>Enter your new password</CardDescription>
-            </div>
-          </CardHeader>
+            <CardHeader className="text-center space-y-4">
+              <div className="flex justify-center">
+                <Link href="/">
+                  <div className="h-16 w-16 rounded-full overflow-hidden border border-primary/20 shadow-md">
+                    <Image
+                      src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain"
+                      alt="Dira Logo"
+                      width={64}
+                      height={64}
+                      className="h-full w-full object-cover"
+                      priority
+                    />
+                  </div>
+                </Link>
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+                <CardDescription>Enter your new password</CardDescription>
+              </div>
+            </CardHeader>
         <CardContent className="space-y-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
