@@ -99,10 +99,24 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4">
             <div className="flex h-20 items-center justify-between">
-                <Link href="/" className="flex items-center group">
-                  <span className="text-2xl md:text-3xl font-serif tracking-tight text-primary hover:text-primary/80 transition-colors">
-                    Dira Sakalya Wellbeing
-                  </span>
+                <Link href="/" className="flex items-center gap-3 group">
+                  <div className="h-12 w-12 rounded-full overflow-hidden border border-primary/10 shadow-sm flex-shrink-0">
+                    <Image 
+                      src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
+                      alt="Dira Logo" 
+                      width={48} 
+                      height={48} 
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-2xl md:text-3xl font-serif tracking-tight text-primary leading-none">
+                      Dira
+                    </span>
+                    <span className="text-sm md:text-base font-felipa text-primary/80 leading-tight mt-0.5">
+                      Sakalya Wellbeing
+                    </span>
+                  </div>
                 </Link>
 
 
