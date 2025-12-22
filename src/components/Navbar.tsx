@@ -99,16 +99,16 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4">
           <div className="flex h-20 items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 group h-16">
-              <Image 
-                src="/dira-logo-new.png" 
-                alt="Dira Logo" 
-                width={150} 
-                height={60} 
-                className="h-full w-auto object-contain py-1"
-                priority
-              />
-            </Link>
+              <Link href="/" className="flex items-center space-x-2 group h-16">
+                <Image 
+                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
+                  alt="Dira Logo" 
+                  width={60} 
+                  height={60} 
+                  className="h-full w-auto object-contain py-1 scale-150"
+                  priority
+                />
+              </Link>
 
 
               <div className="hidden md:flex items-center space-x-10 font-serif italic">
