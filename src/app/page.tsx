@@ -77,13 +77,10 @@ function HomeContent() {
               </div>
               
               <div className="relative flex flex-col items-center">
-                <div className="relative w-80 h-80 md:w-[28rem] md:h-[28rem] mb-6 animate-float">
-                  <img 
-                    src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/icon-1-1766429667844.png?width=8000&height=8000&resize=contain" 
-                    alt="Dira Sakalya Wellbeing Logo" 
-                    className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.2)]"
-                  />
-                  <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" />
+                <div className="relative mb-8 animate-float text-center">
+                  <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">
+                    Dira Sakalya <br className="md:hidden" /> Wellbeing
+                  </h1>
                 </div>
               </div>
               
