@@ -50,6 +50,14 @@ export default function FloatingBackground() {
         stars: 10,
         opacity: 0.2,
       };
+    } else if (pathname?.startsWith("/admin")) {
+      return {
+        cards: 4,
+        gems: 8,
+        moons: 4,
+        stars: 6,
+        opacity: 0.1,
+      };
     }
     // Default config
     return {
