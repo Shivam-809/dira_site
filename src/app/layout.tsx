@@ -42,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${mrsSaintDelafield.variable} ${montserrat.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${mrsSaintDelafield.variable} ${montserrat.variable} ${felipa.variable}`}>
         <body className="antialiased sunny-beige-bg">
           <FloatingBackground />
           <Script
