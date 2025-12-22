@@ -348,78 +348,190 @@ export default function AdminUsersPage() {
                             day: "numeric",
                           })}
                         </p>
-                        {user.emailVerified && (
-                          <Badge variant="outline" className="text-xs">
-                            ✓ Verified
-                          </Badge>
-                        )}
-                      </div>
+                          {user.emailVerified && (
+                            <Badge variant="outline" className="text-xs">
+                              ✓ Verified
+                            </Badge>
+                          )}
+                        </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleRoleChange(user)}
-                      >
-                        {user.role === "admin" ? "Revoke Admin" : "Make Admin"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleViewDetails(user)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" /> Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleRoleChangeRequest(user)}
+                          >
+                            <Shield className="h-4 w-4 mr-1" /> Role
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive hover:text-white"
+                            onClick={() => handleDeleteRequest(user)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
 
-      {/* Role Change Confirmation Dialog */}
-      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Change User Role</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to change the role of <strong>{selectedUser?.name}</strong> to{" "}
-              <strong>{selectedUser?.role === "admin" ? "user" : "admin"}</strong>?
-              {selectedUser?.role !== "admin" && (
-                <span className="block mt-2 text-amber-600">
-                  This will grant them full administrative access to the system.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSelectedUser(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRoleChange}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
 
-      <Footer />
-    </div>
-  );
-}
+        {/* Role Change Confirmation Dialog */}
+        <AlertDialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Change User Role</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to change the role of <strong>{selectedUser?.name}</strong> to{" "}
+                <strong>{selectedUser?.role === "admin" ? "user" : "admin"}</strong>?
+                {selectedUser?.role !== "admin" && (
+                  <span className="block mt-2 text-amber-600">
+                    This will grant them full administrative access to the system.
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setSelectedUser(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmRoleChange}>Confirm</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-destructive">Delete User</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <strong>{selectedUser?.name}</strong>? This action cannot be undone and will remove all their data from the system.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setSelectedUser(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* User Details Dialog */}
+        <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>User Profile Details</DialogTitle>
+            </DialogHeader>
+            
+            {selectedUser && (
+              <div className="space-y-6 pt-4">
+                <div className="flex items-center gap-4">
+                  {selectedUser.image ? (
+                    <img src={selectedUser.image} alt={selectedUser.name} className="h-16 w-16 rounded-full" />
+                  ) : (
+                    <UserCircle className="h-16 w-16 text-muted-foreground" />
+                  )}
+                  <div>
+                    <h3 className="text-xl font-bold">{selectedUser.name}</h3>
+                    <p className="text-muted-foreground flex items-center gap-1">
+                      <Mail className="h-4 w-4" /> {selectedUser.email}
+                    </p>
+                  </div>
+                  <Badge variant={selectedUser.role === 'admin' ? 'default' : 'secondary'} className="ml-auto">
+                    {selectedUser.role.toUpperCase()}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs text-muted-foreground uppercase flex items-center gap-1 font-semibold mb-1">
+                      <Calendar className="h-3 w-3" /> Joined
+                    </p>
+                    <p className="font-medium">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs text-muted-foreground uppercase flex items-center gap-1 font-semibold mb-1">
+                      <Shield className="h-3 w-3" /> Status
+                    </p>
+                    <p className="font-medium">{selectedUser.emailVerified ? 'Verified' : 'Unverified'}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="font-bold flex items-center gap-2 mb-4">
+                    <ShoppingBasket className="h-5 w-5" /> Recent Orders
+                  </h4>
+                  
+                  {loadingOrders ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : userOrders.length > 0 ? (
+                    <div className="space-y-3">
+                      {userOrders.map(order => (
+                        <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div>
+                            <p className="font-medium">Order #{order.id}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">${order.totalAmount.toFixed(2)}</p>
+                            <Badge variant="outline" className={getStatusColor(order.status)}>
+                              {order.status.toUpperCase()}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-muted-foreground italic">No orders found for this user.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <Footer />
+      </div>
+    );
+  }
