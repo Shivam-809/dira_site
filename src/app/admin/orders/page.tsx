@@ -202,135 +202,6 @@ export default function AdminOrdersPage() {
     return colors[status] || "bg-gray-500";
   };
 
-  createdAt: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  };
-}
-
-export default function AdminOrdersPage() {
-  const router = useRouter();
-  const [adminSession, setAdminSession] = useState<{ id: number; name: string; email: string } | null>(null);
-  const [sessionLoading, setSessionLoading] = useState(true);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Verify admin session
-  useEffect(() => {
-    const verifyAdminSession = async () => {
-      const token = localStorage.getItem("admin_token");
-      
-      if (!token) {
-        toast.error("Please login as admin");
-        router.push("/admin/login");
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/admin/auth/verify", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
-
-        if (!response.ok) {
-          localStorage.removeItem("admin_token");
-          toast.error("Session expired. Please login again.");
-          router.push("/admin/login");
-          return;
-        }
-
-        const data = await response.json();
-        setAdminSession(data.admin);
-        setSessionLoading(false);
-      } catch (error) {
-        console.error("Session verification failed:", error);
-        localStorage.removeItem("admin_token");
-        toast.error("Session verification failed. Please login again.");
-        router.push("/admin/login");
-      }
-    };
-
-    verifyAdminSession();
-  }, [router]);
-
-  useEffect(() => {
-    if (adminSession) {
-      fetchOrders();
-    }
-  }, [adminSession, statusFilter, searchQuery]);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("admin_token");
-      const params = new URLSearchParams({ limit: "100" });
-      if (statusFilter !== "all") params.append("status", statusFilter);
-      if (searchQuery) params.append("search", searchQuery);
-
-      const response = await fetch(`/api/admin/orders?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data);
-      } else {
-        toast.error("Failed to load orders");
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      toast.error("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (orderId: number, newStatus: string) => {
-    try {
-      const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/orders", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ orderId, status: newStatus }),
-      });
-
-      if (response.ok) {
-        toast.success("Order status updated!");
-        fetchOrders();
-      } else {
-        toast.error("Failed to update order status");
-      }
-    } catch (error) {
-      toast.error("Failed to update order status");
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: "bg-yellow-500",
-      paid: "bg-green-500",
-      shipped: "bg-blue-500",
-      delivered: "bg-purple-500",
-      cancelled: "bg-red-500",
-    };
-    return colors[status] || "bg-gray-500";
-  };
-
   // Pagination
   const totalPages = Math.ceil(orders.length / itemsPerPage);
   const paginatedOrders = orders.slice(
@@ -356,9 +227,16 @@ export default function AdminOrdersPage() {
 
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Order Management</h1>
-            <p className="text-muted-foreground">View and manage all customer orders</p>
+          <div className="mb-8 flex justify-between items-end">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Order Management</h1>
+              <p className="text-muted-foreground">View and manage all customer orders</p>
+            </div>
+            <div className="text-right hidden sm:block">
+              <Badge variant="outline" className="text-primary border-primary/20">
+                Total Orders: {orders.length}
+              </Badge>
+            </div>
           </div>
 
           {/* Filters */}
@@ -405,14 +283,19 @@ export default function AdminOrdersPage() {
             <>
               <div className="space-y-4">
                 {paginatedOrders.map((order) => (
-                  <Card key={order.id}>
-                    <CardHeader>
+                  <Card key={order.id} className="overflow-hidden border-primary/10 hover:border-primary/30 transition-all">
+                    <CardHeader className="bg-muted/30 pb-4">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div className="space-y-1">
-                          <CardTitle>Order #{order.id}</CardTitle>
+                          <div className="flex items-center gap-2">
+                             <CardTitle className="text-lg">Order #{order.id}</CardTitle>
+                             <Badge className={`${getStatusColor(order.status)} text-white border-0`}>
+                               {order.status.toUpperCase()}
+                             </Badge>
+                          </div>
                           <div className="text-sm text-muted-foreground space-y-1">
-                            <p>
-                              Customer: {order.user?.name || "Unknown"} ({order.user?.email || "N/A"})
+                            <p className="flex items-center gap-1">
+                              <User className="h-3 w-3" /> {order.user?.name || "Unknown"} ({order.user?.email || "N/A"})
                             </p>
                             <p>
                               {new Date(order.createdAt).toLocaleDateString("en-US", {
@@ -425,62 +308,94 @@ export default function AdminOrdersPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status.toUpperCase()}
-                          </Badge>
-                          <Select
-                            value={order.status}
-                            onValueChange={(value) => handleStatusChange(order.id, value)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="paid">Paid</SelectItem>
-                              <SelectItem value="shipped">Shipped</SelectItem>
-                              <SelectItem value="delivered">Delivered</SelectItem>
-                              <SelectItem value="cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                          <div className="flex gap-2">
+                            <Select
+                              value={order.status}
+                              onValueChange={(value) => handleStatusChange(order.id, value)}
+                            >
+                              <SelectTrigger className="w-[140px] h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="paid">Paid</SelectItem>
+                                <SelectItem value="shipped">Shipped</SelectItem>
+                                <SelectItem value="delivered">Delivered</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-9 w-9 text-destructive hover:bg-destructive hover:text-white"
+                              onClick={() => handleDeleteRequest(order)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold mb-2">Items</h4>
-                        <div className="space-y-1">
-                          {order.items.map((item, index) => (
-                            <div key={index} className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                {item.name || `Product #${item.productId}`} x {item.quantity}
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                          <h4 className="font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                            <Package className="h-4 w-4" /> Items Ordered
+                          </h4>
+                          <div className="space-y-2">
+                            {order.items.map((item, index) => (
+                              <div key={index} className="flex justify-between text-sm p-2 bg-muted/20 rounded">
+                                <span className="font-medium">
+                                  {item.name || `Product #${item.productId}`} <span className="text-muted-foreground font-normal">x {item.quantity}</span>
+                                </span>
+                                <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                            <Separator className="my-2" />
+                            <div className="flex justify-between items-center px-2">
+                              <span className="font-bold">Total Amount</span>
+                              <span className="text-xl font-bold text-primary">
+                                ${order.totalAmount.toFixed(2)}
                               </span>
-                              <span>${(item.price * item.quantity).toFixed(2)}</span>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold mb-2">Shipping Address</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {order.shippingAddress.name}
-                          <br />
-                          {order.shippingAddress.address || order.shippingAddress.street}
-                          <br />
-                          {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
-                          {order.shippingAddress.zip || order.shippingAddress.zipCode}
-                          <br />
-                          {order.shippingAddress.country}
-                        </p>
-                      </div>
-
-                      <div className="border-t pt-4 flex justify-between items-center">
-                        <span className="font-semibold">Total Amount</span>
-                        <span className="text-2xl font-bold text-primary">
-                          ${order.totalAmount.toFixed(2)}
-                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                           <div>
+                              <h4 className="font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                                <Truck className="h-4 w-4" /> Shipping
+                              </h4>
+                              <p className="text-sm leading-relaxed p-3 bg-muted/20 rounded">
+                                <span className="font-semibold">{order.shippingAddress.name}</span>
+                                <br />
+                                {order.shippingAddress.address || order.shippingAddress.street}
+                                <br />
+                                {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
+                                {order.shippingAddress.zip || order.shippingAddress.zipCode}
+                                <br />
+                                {order.shippingAddress.country}
+                              </p>
+                           </div>
+                           <div>
+                              <h4 className="font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                                <CreditCard className="h-4 w-4" /> Payment Info
+                              </h4>
+                              <div className="text-sm p-3 bg-muted/20 rounded">
+                                <p className="flex justify-between mb-1">
+                                  <span className="text-muted-foreground">Method:</span>
+                                  <span className="font-medium">Razorpay</span>
+                                </p>
+                                <p className="flex justify-between">
+                                  <span className="text-muted-foreground">Status:</span>
+                                  <span className={`font-medium ${order.status === 'pending' ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                    {order.status === 'pending' ? 'Processing' : 'Completed'}
+                                  </span>
+                                </p>
+                              </div>
+                           </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -515,6 +430,21 @@ export default function AdminOrdersPage() {
           )}
         </div>
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>Order #{selectedOrder?.id}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedOrder(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
