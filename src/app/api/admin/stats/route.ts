@@ -2,26 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { user, orders } from '@/db/schema';
 import { eq, or, desc, sql } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Validate session using better-auth
-    const session = await auth.api.getSession({ headers: request.headers });
-    
-    if (!session) {
-      return NextResponse.json({ 
-        error: 'Authentication required',
-        code: 'UNAUTHORIZED' 
-      }, { status: 401 });
-    }
-
-    // Verify admin role
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({ 
-        error: 'Access denied. Admin role required',
-        code: 'FORBIDDEN' 
-      }, { status: 403 });
+    const authCheck = await verifyAdminRequest(request);
+    if (authCheck.error) {
+      return NextResponse.json({ error: authCheck.error }, { status: authCheck.status || 401 });
     }
 
     // Calculate total users
