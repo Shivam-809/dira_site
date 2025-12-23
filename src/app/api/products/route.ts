@@ -213,6 +213,8 @@ export async function PUT(request: NextRequest) {
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl?.trim() || null;
     if (stock !== undefined) updateData.stock = stock;
     if (featured !== undefined) updateData.featured = featured;
+    if (originalPrice !== undefined) updateData.originalPrice = originalPrice;
+    if (benefits !== undefined) updateData.benefits = benefits?.trim() || null;
 
     const updatedProduct = await db
       .update(products)
