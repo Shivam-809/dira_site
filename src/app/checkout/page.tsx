@@ -462,36 +462,42 @@ export default function CheckoutPage() {
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    {cartItems.map(item => {
-                      const product = products.find(p => p.id === item.productId);
-                      return (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            {product?.name} x {item.quantity}
-                          </span>
-                          <span>₹{((product?.price || 0) * item.quantity).toFixed(2)}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      {cartItems.map(item => {
+                        const product = products.find(p => p.id === item.productId);
+                        return (
+                          <div key={item.id} className="flex justify-between text-sm">
+                            <span className="text-muted-foreground font-serif italic">
+                              {product?.name} x {item.quantity}
+                            </span>
+                            <span className="font-serif">{formatPrice((product?.price || 0) * item.quantity)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                  <div className="space-y-2 border-t pt-4">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span>₹{calculateTotal().toFixed(2)}</span>
+                    <div className="space-y-2 border-t border-primary/10 pt-4 font-serif">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground italic">Subtotal</span>
+                        <span>{formatPrice(calculateTotal())}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground italic">Shipping</span>
+                        <span className="text-primary font-medium">Free</span>
+                      </div>
+                      <div className="flex justify-between text-xl font-bold border-t border-primary/10 pt-2">
+                        <span className="italic">Total</span>
+                        <div className="text-right">
+                          <p className="text-primary">{formatPrice(calculateTotal())}</p>
+                          {currency === 'USD' && (
+                            <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{calculateTotal().toLocaleString()}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span>Free</span>
-                    </div>
-                    <div className="flex justify-between text-lg font-bold border-t pt-2">
-                      <span>Total</span>
-                      <span className="text-primary">₹{calculateTotal().toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
+
               </Card>
             </div>
           </div>
