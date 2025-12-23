@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SessionBooking from "@/components/SessionBooking";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface Product {
   id: number;
