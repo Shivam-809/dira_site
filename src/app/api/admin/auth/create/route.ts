@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
     const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha256').toString('hex');
     const hashedPassword = `${salt}:${hash}`;
 
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Create timestamps
     const timestamp = new Date().toISOString();
 
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
     const [newAdmin] = await db.insert(admin)
       .values({
         id: adminId,
-        email: sanitizedEmail,
+        email: normalizedEmail,
         emailVerified: false,
         name: sanitizedName,
         image: image || null,
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
     await db.insert(adminAccount)
       .values({
         id: accountId,
-        accountId: sanitizedEmail,
+        accountId: normalizedEmail,
         providerId: 'credential',
         adminId: adminId,
         password: hashedPassword,
