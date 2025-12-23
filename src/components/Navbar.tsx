@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, User, Menu, X, Shield } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Shield, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
+import { useCurrency } from "@/hooks/use-currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import {
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const { currency, setCurrency, symbol } = useCurrency();
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [adminSession, setAdminSession] = useState<{ id: number; name: string; email: string } | null>(null);
