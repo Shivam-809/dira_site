@@ -166,14 +166,17 @@ export default function ProductDetailPage() {
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
-                        <Input
-                          type="number"
-                          value={quantity}
-                          onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-20 text-center"
-                          min="1"
-                          max={product.stock}
-                        />
+                          <Input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 1;
+                              setQuantity(Math.min(product.stock, Math.max(1, val)));
+                            }}
+                            className="w-20 text-center"
+                            min="1"
+                            max={product.stock}
+                          />
                         <Button
                           variant="outline"
                           size="icon"
