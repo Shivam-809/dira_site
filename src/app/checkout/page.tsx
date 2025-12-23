@@ -14,7 +14,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
-import { CreditCard, Loader2, Smartphone } from "lucide-react";
+import { useCurrency } from "@/hooks/use-currency";
+import { CreditCard, Loader2, Smartphone, Globe } from "lucide-react";
 
 declare global {
   interface Window {
