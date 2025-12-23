@@ -11,6 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface Product {
   id: number;
