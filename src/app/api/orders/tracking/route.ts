@@ -1,47 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { orderTracking, orders, session, user } from '@/db/schema';
+import { orderTracking, orders } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 async function verifyUserAccess(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    if (!session) {
       return { error: NextResponse.json({ error: 'Authentication required', code: 'UNAUTHORIZED' }, { status: 401 }) };
     }
 
-    const token = authHeader.substring(7);
-
-    // Verify user session token
-    const sessions = await db.select()
-      .from(session)
-      .where(eq(session.token, token))
-      .limit(1);
-
-    if (sessions.length === 0) {
-      return { error: NextResponse.json({ error: 'Invalid session token', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    const userSession = sessions[0];
-
-    // Check if session has expired
-    const expiresAt = new Date(userSession.expiresAt);
-    if (expiresAt < new Date()) {
-      return { error: NextResponse.json({ error: 'Session expired', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    // Get user details
-    const users = await db.select()
-      .from(user)
-      .where(eq(user.id, userSession.userId))
-      .limit(1);
-
-    if (users.length === 0) {
-      return { error: NextResponse.json({ error: 'User not found', code: 'UNAUTHORIZED' }, { status: 401 }) };
-    }
-
-    return { user: users[0], session: userSession };
+    return { user: session.user, session: session.session };
   } catch (error) {
     console.error('Auth error:', error);
     return { error: NextResponse.json({ error: 'Authentication failed', code: 'AUTH_ERROR' }, { status: 401 }) };
