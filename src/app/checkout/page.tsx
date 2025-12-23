@@ -44,6 +44,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "upi">("card");
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
+  const { formatPrice, currency, convertPrice } = useCurrency();
+
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
