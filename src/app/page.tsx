@@ -222,7 +222,7 @@ function HomeContent() {
                   <Card key={product.id} className="overflow-hidden bg-white/50 border-primary/10 hover:border-primary/30 transition-all duration-500 group gold-border shadow-xl hover:shadow-2xl">
                     <div className="relative h-72 bg-muted/10 flex items-center justify-center overflow-hidden">
                       <img
-                        src={`https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop`}
+                        src={product.imageUrl || `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop`}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
