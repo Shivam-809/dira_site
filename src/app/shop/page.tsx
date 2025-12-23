@@ -116,31 +116,52 @@ export default function ShopPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products.map((product) => (
-                    <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="relative h-48 bg-muted flex items-center justify-center">
-                        <img
-                          src={product.imageUrl || `https://placehold.co/400x300/f5f5f5/333333?text=${encodeURIComponent(product.name)}`}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                  <CardHeader>
-                    <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {product.description}
-                    </p>
-                  </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-primary">
-                          {formatPrice(product.price)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {product.stock > 0 ? "In stock" : "Out of stock"}
-                        </span>
-                      </div>
-                    </CardContent>
+                  {products.map((product) => (
+                      <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all group relative border-primary/10">
+                        <div className="relative h-56 bg-muted flex items-center justify-center overflow-hidden">
+                          <img
+                            src={product.imageUrl || `https://placehold.co/400x300/f5f5f5/333333?text=${encodeURIComponent(product.name)}`}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          {product.stock <= 0 && (
+                            <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                              <span className="bg-destructive text-destructive-foreground px-4 py-2 rounded-full font-serif text-sm font-bold tracking-widest uppercase shadow-lg">
+                                Out of Stock
+                              </span>
+                            </div>
+                          )}
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest z-20 shadow-md">
+                              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                            </div>
+                          )}
+                        </div>
+                    <CardHeader className="space-y-1">
+                      <CardTitle className="text-xl font-serif line-clamp-1 group-hover:text-primary transition-colors">{product.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground line-clamp-2 font-serif italic">
+                        {product.description}
+                      </p>
+                    </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-serif font-bold text-primary">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <span className="text-sm text-muted-foreground line-through decoration-primary/30">
+                              {formatPrice(product.originalPrice)}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {product.benefits && (
+                          <div className="text-[10px] font-serif italic text-primary/70 bg-primary/5 p-2 rounded border border-primary/10 line-clamp-1">
+                            ✨ {product.benefits}
+                          </div>
+                        )}
+                      </CardContent>
+
 
                   <CardFooter>
                     <Link href={`/products/${product.id}`} className="w-full">
