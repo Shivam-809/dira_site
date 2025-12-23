@@ -82,12 +82,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { name, description, price, category, imageUrl, stock, featured } = body;
+  export async function POST(request: NextRequest) {
+    try {
+      const body = await request.json();
+      const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits } = body;
+  
+      // Validate required fields
 
-    // Validate required fields
     if (!name) {
       return NextResponse.json(
         { error: 'Name is required', code: 'MISSING_REQUIRED_FIELDS' },
