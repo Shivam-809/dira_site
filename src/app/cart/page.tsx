@@ -171,13 +171,13 @@ export default function CartPage() {
                   <Card key={item.id}>
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <div className="w-24 h-24 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop"
-                            alt={item.product?.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                          <div className="w-24 h-24 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg overflow-hidden flex-shrink-0">
+                            <img
+                              src={item.product?.imageUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop"}
+                              alt={item.product?.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
