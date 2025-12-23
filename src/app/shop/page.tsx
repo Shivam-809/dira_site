@@ -131,29 +131,30 @@ export default function ShopPage() {
                               </span>
                             </div>
                           )}
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest z-20 shadow-md">
-                              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                            </div>
-                          )}
-                        </div>
-                    <CardHeader className="space-y-1">
-                      <CardTitle className="text-xl font-serif line-clamp-1 group-hover:text-primary transition-colors">{product.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground line-clamp-2 font-serif italic">
-                        {product.description}
-                      </p>
-                    </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-serif font-bold text-primary">
-                            {formatPrice(product.price)}
+                        {/* Optimized discount logic: if originalPrice is lower than price, we treat price as original and original as sale */}
+                        {product.originalPrice && product.originalPrice !== product.price && (
+                          <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest z-20 shadow-md">
+                            {Math.round((Math.abs(product.originalPrice - product.price) / Math.max(product.originalPrice, product.price)) * 100)}% OFF
+                          </div>
+                        )}
+                      </div>
+                  <CardHeader className="space-y-1">
+                    <CardTitle className="text-xl font-serif line-clamp-1 group-hover:text-primary transition-colors">{product.name}</CardTitle>
+                    <p className="text-sm text-muted-foreground line-clamp-2 font-serif italic">
+                      {product.description}
+                    </p>
+                  </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-serif font-bold text-primary">
+                          {formatPrice(product.originalPrice && product.originalPrice < product.price ? product.originalPrice : product.price)}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-sm text-muted-foreground line-through decoration-primary/30">
+                            {formatPrice(product.originalPrice < product.price ? product.price : product.originalPrice)}
                           </span>
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <span className="text-sm text-muted-foreground line-through decoration-primary/30">
-                              {formatPrice(product.originalPrice)}
-                            </span>
-                          )}
-                        </div>
+                        )}
+                      </div>
                         
                         {product.benefits && (
                           <div className="text-[10px] font-serif italic text-primary/70 bg-primary/5 p-2 rounded border border-primary/10 line-clamp-1">
