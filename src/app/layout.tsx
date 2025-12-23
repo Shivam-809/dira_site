@@ -7,6 +7,13 @@ import AiChatbot from "@/components/AiChatbot";
 import CredentialCleaner from "@/components/CredentialCleaner";
 import FloatingBackground from "@/components/FloatingBackground";
 import { Bebas_Neue, Mrs_Saint_Delafield, Montserrat, Felipa } from 'next/font/google';
+import { CurrencyProvider } from "@/hooks/use-currency";
+
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-bebas-neue',
+});
 
 const bebasNeue = Bebas_Neue({
   weight: '400',
