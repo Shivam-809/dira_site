@@ -186,7 +186,7 @@ export default function CartPage() {
                                 {item.product?.name || "Product"}
                               </h3>
                               <p className="text-primary font-bold">
-                                ${(item.product?.price || 0).toFixed(2)}
+                                {formatPrice(item.product?.price || 0)}
                               </p>
                             </div>
                             <Button
