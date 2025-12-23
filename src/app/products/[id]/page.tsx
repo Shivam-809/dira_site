@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { ShoppingCart, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface Product {
   id: number;
