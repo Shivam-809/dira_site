@@ -146,15 +146,15 @@ export default function ProductDetailPage() {
 
                   <div className="flex items-baseline gap-4">
                     <div className="text-4xl font-bold text-primary">
-                      {formatPrice(product.price)}
+                      {formatPrice(product.originalPrice && product.originalPrice < product.price ? product.originalPrice : product.price)}
                     </div>
-                    {product.originalPrice && product.originalPrice > product.price && (
+                    {product.originalPrice && product.originalPrice !== product.price && (
                       <div className="flex items-center gap-2">
                         <span className="text-xl text-muted-foreground line-through decoration-primary/30">
-                          {formatPrice(product.originalPrice)}
+                          {formatPrice(product.originalPrice < product.price ? product.price : product.originalPrice)}
                         </span>
                         <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-sm font-bold">
-                          {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                          {Math.round((Math.abs(product.originalPrice - product.price) / Math.max(product.originalPrice, product.price)) * 100)}% OFF
                         </span>
                       </div>
                     )}
