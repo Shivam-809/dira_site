@@ -30,6 +30,8 @@ const productSchema = z.object({
   stock: z.number().int().min(0, "Stock must be non-negative"),
   featured: z.boolean(),
   imageUrl: z.string().optional(),
+  originalPrice: z.number().min(0, "Original price must be non-negative").optional().nullable(),
+  benefits: z.string().optional().nullable(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -43,6 +45,8 @@ interface Product {
   imageUrl?: string | null;
   stock: number;
   featured: boolean;
+  originalPrice?: number | null;
+  benefits?: string | null;
 }
 
 interface DashboardStats {
