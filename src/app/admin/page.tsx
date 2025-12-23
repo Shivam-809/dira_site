@@ -532,14 +532,19 @@ export default function AdminPage() {
                        <span className="font-bold">Email (Resend)</span>
                        <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></span>
                     </div>
-                    <Separator className="my-4" />
-                    <div className="space-y-2">
-                       <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Inventory Health</p>
-                       <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div className="bg-primary h-full w-[85%]"></div>
-                       </div>
-                       <p className="text-xs text-slate-400 font-medium text-right">85% In Stock</p>
-                    </div>
+                      <Separator className="my-4" />
+                      <div className="space-y-2">
+                         <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Inventory Summary</p>
+                         <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-primary h-full transition-all duration-500" 
+                              style={{ width: `${Math.min(100, (products.filter(p => p.stock > 0).length / Math.max(1, products.length)) * 100)}%` }}
+                            ></div>
+                         </div>
+                         <p className="text-xs text-slate-400 font-medium text-right">
+                           {products.filter(p => p.stock > 0).length} of {products.length} Products In Stock
+                         </p>
+                      </div>
                  </CardContent>
                </Card>
 
