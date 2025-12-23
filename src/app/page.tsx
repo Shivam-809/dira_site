@@ -80,14 +80,14 @@ function HomeContent() {
               
               <div className="relative flex flex-col items-center">
                 <div className="relative mb-8 animate-float text-center">
-                  <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">
-                    Dira Sakalya <br className="md:hidden" /> Divine Healing
+                  <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] font-cinzel font-[600]">
+                    Clarity. Healing. <br /> Conscious Alignment.
                   </h1>
                 </div>
               </div>
               
-              <p className="text-2xl md:text-3xl font-serif italic text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed">
-                Unlock the mysteries of your soul. Discover curated tarot collections and sacred crystals for your spiritual path.
+              <p className="text-2xl md:text-3xl font-cormorant italic text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed">
+                Ethical tarot and intuitive healing for those ready to understand, heal, and realign.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
