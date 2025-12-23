@@ -15,12 +15,6 @@ const bebasNeue = Bebas_Neue({
   variable: '--font-bebas-neue',
 });
 
-const bebasNeue = Bebas_Neue({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-bebas-neue',
-});
-
 const felipa = Felipa({
   weight: '400',
   subsets: ['latin'],
@@ -51,22 +45,24 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bebasNeue.variable} ${mrsSaintDelafield.variable} ${montserrat.variable} ${felipa.variable}`}>
         <body className="antialiased sunny-beige-bg">
-          <FloatingBackground />
-          <Script
-          id="orchids-browser-logs"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
-          strategy="afterInteractive"
-          data-orchids-project-id="04c8335b-bde9-4e7c-b6bf-2bde80ea48fe"
-        />
-        <ErrorReporter />
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="afterInteractive"
-        />
-        {children}
-        <AiChatbot domain="general" />
-        <Toaster />
-      </body>
+          <CurrencyProvider>
+            <FloatingBackground />
+            <Script
+              id="orchids-browser-logs"
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
+              strategy="afterInteractive"
+              data-orchids-project-id="04c8335b-bde9-4e7c-b6bf-2bde80ea48fe"
+            />
+            <ErrorReporter />
+            <Script
+              src="https://checkout.razorpay.com/v1/checkout.js"
+              strategy="afterInteractive"
+            />
+            {children}
+            <AiChatbot domain="general" />
+            <Toaster />
+          </CurrencyProvider>
+        </body>
     </html>
   );
 }
