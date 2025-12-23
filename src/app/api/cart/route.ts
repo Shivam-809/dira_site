@@ -229,6 +229,21 @@ export async function PUT(request: NextRequest) {
           { status: 400 }
         );
       }
+
+      // Check stock
+      const productData = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, existingCartItem[0].productId))
+        .limit(1);
+      
+      const availableStock = productData[0]?.stock || 0;
+      if (quantityInt > availableStock) {
+        return NextResponse.json(
+          { error: `Only ${availableStock} items available in stock`, code: 'INSUFFICIENT_STOCK' },
+          { status: 400 }
+        );
+      }
     }
 
     const updates: any = {
