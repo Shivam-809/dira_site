@@ -432,12 +432,20 @@ export default function CheckoutPage() {
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                             Processing...
                           </>
-                        ) : !razorpayLoaded ? (
-                          "Loading payment gateway..."
-                        ) : (
-                          `Pay ₹${calculateTotal().toFixed(2)}`
+                          ) : !razorpayLoaded ? (
+                            "Loading payment gateway..."
+                          ) : (
+                            `Pay ${currency === 'USD' ? `${formatPrice(calculateTotal())} (₹${calculateTotal()})` : formatPrice(calculateTotal())}`
+                          )}
+                        </Button>
+
+                        {currency === 'USD' && (
+                          <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg text-xs text-primary font-serif italic">
+                            <Globe className="h-4 w-4 shrink-0" />
+                            <p>International payment will be processed in INR (Indian Rupees) at the current exchange rate.</p>
+                          </div>
                         )}
-                      </Button>
+
 
                       <p className="text-xs text-center text-muted-foreground">
                         🔒 Payments are secured by Razorpay
