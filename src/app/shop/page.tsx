@@ -114,14 +114,14 @@ export default function ShopPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48 bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
-                    <img
-                      src={`https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop`}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="relative h-48 bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
+                      <img
+                        src={product.imageUrl || `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop`}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   <CardHeader>
                     <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
                     <p className="text-sm text-muted-foreground line-clamp-2">
