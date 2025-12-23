@@ -55,6 +55,8 @@ export default function SessionBooking() {
     notes: "",
   });
 
+  const { formatPrice, currency } = useCurrency();
+
   useEffect(() => {
     fetchAvailableSlots();
   }, []);
