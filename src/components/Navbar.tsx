@@ -140,6 +140,23 @@ export default function Navbar() {
 
 
           <div className="flex items-center space-x-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-primary/10 text-primary font-serif">
+                  <Globe className="h-4 w-4" />
+                  <span>{currency}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-card border-primary/20">
+                <DropdownMenuItem onClick={() => setCurrency('INR')} className="cursor-pointer font-serif">
+                  🇮🇳 INR (₹)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCurrency('USD')} className="cursor-pointer font-serif">
+                  🇺🇸 USD ($)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {!isAdmin && (
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
