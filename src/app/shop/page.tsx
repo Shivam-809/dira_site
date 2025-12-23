@@ -128,16 +128,17 @@ export default function ShopPage() {
                       {product.description}
                     </p>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-primary">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {product.stock > 0 ? "In stock" : "Out of stock"}
-                      </span>
-                    </div>
-                  </CardContent>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-primary">
+                          {formatPrice(product.price)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {product.stock > 0 ? "In stock" : "Out of stock"}
+                        </span>
+                      </div>
+                    </CardContent>
+
                   <CardFooter>
                     <Link href={`/products/${product.id}`} className="w-full">
                       <Button className="w-full" size="sm">View Details</Button>
