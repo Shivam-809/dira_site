@@ -209,6 +209,8 @@ export default function AdminPage() {
       stock: product.stock,
       featured: product.featured,
       imageUrl: product.imageUrl || "",
+      originalPrice: product.originalPrice,
+      benefits: product.benefits || "",
     });
     setDialogOpen(true);
   };
