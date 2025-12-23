@@ -136,9 +136,10 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              <div className="text-3xl font-bold text-primary">
-                ${product.price.toFixed(2)}
-              </div>
+                <div className="text-3xl font-bold text-primary">
+                  {formatPrice(product.price)}
+                </div>
+
 
               <p className="text-muted-foreground leading-relaxed">
                 {product.description}
