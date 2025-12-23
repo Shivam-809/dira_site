@@ -389,29 +389,50 @@ export default function SessionBooking() {
             </div>
 
             {selectedSessionType && (
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Session Price</span>
-                  <span className="text-2xl font-bold text-primary">₹{selectedSessionType.price}</span>
+                  <span className="text-muted-foreground italic">Session Exchange</span>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{formatPrice(selectedSessionType.price)}</p>
+                    {currency === 'USD' && (
+                      <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{selectedSessionType.price.toLocaleString()}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-2xl tracking-widest py-8"
-              disabled={loading || isPending}
-            >
-              {loading ? (
-                <span className="animate-pulse">Processing...</span>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Pay & Book Session
-                </>
+            <div className="space-y-4">
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-2xl tracking-widest py-8 h-auto shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                disabled={loading || isPending}
+              >
+                {loading ? (
+                  <span className="animate-pulse">Invoking Gateway...</span>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center">
+                      <CreditCard className="mr-2 h-6 w-6" />
+                      <span>Pay & Book Session</span>
+                    </div>
+                    {selectedSessionType && (
+                      <span className="text-xs font-serif italic mt-1 opacity-80">
+                        Total: {currency === 'USD' ? `${formatPrice(selectedSessionType.price)} (₹${selectedSessionType.price})` : formatPrice(selectedSessionType.price)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </Button>
+
+              {currency === 'USD' && (
+                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg text-xs text-primary font-serif italic">
+                  <Globe className="h-4 w-4 shrink-0" />
+                  <p>International payment will be processed in INR (Indian Rupees).</p>
+                </div>
               )}
-            </Button>
+            </div>
 
             {!session?.user && (
               <p className="text-sm text-muted-foreground text-center">
