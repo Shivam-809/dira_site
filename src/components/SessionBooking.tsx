@@ -13,10 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Clock, Sparkles, CheckCircle2, CreditCard } from "lucide-react";
+import { Calendar, Clock, Sparkles, CheckCircle2, CreditCard, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/hooks/use-currency";
 
 declare global {
   interface Window {
