@@ -130,23 +130,52 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-            {/* Product Details */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
-                <p className="text-sm text-muted-foreground uppercase tracking-wide">
-                  {product.category}
-                </p>
-              </div>
-
-                <div className="text-3xl font-bold text-primary">
-                  {formatPrice(product.price)}
+              {/* Product Details */}
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h1 className="text-4xl font-bold">{product.name}</h1>
+                    {product.stock <= 0 && (
+                      <Badge variant="destructive" className="uppercase font-bold tracking-widest px-3 py-1">Out of Stock</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wide font-serif italic">
+                    {product.category}
+                  </p>
                 </div>
 
+                  <div className="flex items-baseline gap-4">
+                    <div className="text-4xl font-bold text-primary">
+                      {formatPrice(product.price)}
+                    </div>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl text-muted-foreground line-through decoration-primary/30">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-sm font-bold">
+                          {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-              <p className="text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
+                <p className="text-muted-foreground leading-relaxed text-lg italic font-serif">
+                  {product.description}
+                </p>
+
+                {product.benefits && (
+                  <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-3">
+                    <h3 className="font-bold text-primary flex items-center gap-2">
+                      <Plus className="h-4 w-4" /> Sacred Benefits
+                    </h3>
+                    <div className="text-muted-foreground flex items-start gap-2 italic">
+                      <span>✨</span>
+                      <span>{product.benefits}</span>
+                    </div>
+                  </div>
+                )}
+
 
               <Card>
                 <CardContent className="pt-6">
