@@ -198,35 +198,36 @@ export default function CartPage() {
                             </Button>
                           </div>
                           
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <Input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 1;
-                                updateQuantity(item.id, val);
-                              }}
-                              className="w-20 text-center"
-                              min="1"
-                              max={item.product?.stock || 99}
-                            />
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              disabled={item.quantity >= (item.product?.stock || 0)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                disabled={item.quantity <= 1}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <Input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 1;
+                                  const stock = item.product?.stock || 0;
+                                  updateQuantity(item.id, Math.min(stock, Math.max(1, val)));
+                                }}
+                                className="w-20 text-center"
+                                min="1"
+                                max={item.product?.stock || 99}
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => updateQuantity(item.id, Math.min(item.product?.stock || item.quantity, item.quantity + 1))}
+                                disabled={item.quantity >= (item.product?.stock || 0)}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
                         </div>
                       </div>
                     </CardContent>
