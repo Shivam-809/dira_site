@@ -9,25 +9,27 @@ const razorpay = new Razorpay({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('📥 Received create-order request:', body);
     const { amount, currency = 'INR', receipt, customerName, customerEmail, customerPhone } = body;
 
-    if (!amount || amount <= 0) {
+    // Ensure amount is a number and convert to paise
+    const numericAmount = parseFloat(String(amount));
+    
+    if (isNaN(numericAmount) || numericAmount <= 0) {
       return NextResponse.json(
         { success: false, error: 'Invalid amount' },
         { status: 400 }
       );
     }
 
-    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error('❌ Razorpay credentials missing');
-      return NextResponse.json(
-        { success: false, error: 'Payment gateway not configured' },
-        { status: 500 }
-      );
-    }
-
     // Create Razorpay order
-    const amountInPaise = Math.round(Number(amount) * 100);
+    const amountInPaise = Math.round(numericAmount * 100);
+
+    console.log('🔢 Amount conversion:', {
+      original: amount,
+      numeric: numericAmount,
+      paise: amountInPaise
+    });
 
     if (amountInPaise < 100) {
       return NextResponse.json(
