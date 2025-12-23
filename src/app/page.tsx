@@ -241,7 +241,7 @@ function HomeContent() {
                     <CardContent>
                       <div className="flex items-center justify-between border-t border-primary/5 pt-4">
                         <span className="text-3xl font-serif text-primary">
-                          ${product.price.toFixed(2)}
+                          {formatPrice(product.price)}
                         </span>
                         <span className="text-sm font-serif italic text-muted-foreground">
                           Limited Stock
