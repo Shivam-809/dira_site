@@ -27,8 +27,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Razorpay order
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    if (amountInPaise < 100) {
+      return NextResponse.json(
+        { success: false, error: 'Minimum order amount is ₹1.00' },
+        { status: 400 }
+      );
+    }
+
     const options = {
-      amount: Math.round(amount * 100), // Convert to paise
+      amount: amountInPaise, // Convert to paise
       currency,
       receipt: receipt || `receipt_${Date.now()}`,
       notes: {
@@ -38,7 +47,11 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    console.log('📦 Creating Razorpay order:', options);
+    console.log('📦 Creating Razorpay order:', {
+      ...options,
+      originalAmount: amount,
+      amountInPaise
+    });
 
     const order = await razorpay.orders.create(options);
 
