@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { Trash2, Minus, Plus, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface CartItem {
   id: number;
