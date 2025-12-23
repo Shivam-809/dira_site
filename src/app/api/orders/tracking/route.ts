@@ -8,7 +8,7 @@ import { headers } from 'next/headers';
 async function verifyUserAccess(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
-      headers: await headers()
+      headers: request.headers
     });
 
     if (!session) {
