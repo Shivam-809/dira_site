@@ -131,6 +131,8 @@ export async function GET(request: NextRequest) {
       imageUrl: imageUrl?.trim() || null,
       stock: stock !== undefined && stock !== null ? stock : 0,
       featured: featured !== undefined && featured !== null ? featured : false,
+      originalPrice: originalPrice !== undefined && originalPrice !== null ? originalPrice : null,
+      benefits: benefits?.trim() || null,
       createdAt: now,
       updatedAt: now,
     };
