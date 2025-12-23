@@ -81,7 +81,7 @@ function HomeContent() {
               <div className="relative flex flex-col items-center">
                 <div className="relative mb-8 animate-float text-center">
                   <h1 className="text-6xl md:text-8xl font-serif tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">
-                    Dira Sakalya <br className="md:hidden" /> Wellbeing
+                    Dira Sakalya <br className="md:hidden" /> Divine Healing
                   </h1>
                 </div>
               </div>
