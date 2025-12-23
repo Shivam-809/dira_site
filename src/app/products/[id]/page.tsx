@@ -119,9 +119,9 @@ export default function ProductDetailPage() {
         <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
               {/* Product Image */}
-              <div className="relative aspect-square bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg overflow-hidden">
+              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
                 <img
-                  src={product.imageUrl || `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop`}
+                  src={product.imageUrl || `https://placehold.co/800x800/f5f5f5/333333?text=${encodeURIComponent(product.name)}`}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
