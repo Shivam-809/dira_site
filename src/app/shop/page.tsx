@@ -31,6 +31,8 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
 
+  const { formatPrice } = useCurrency();
+
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory, searchQuery]);
