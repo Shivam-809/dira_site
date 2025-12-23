@@ -374,68 +374,56 @@ export default function AdminPage() {
             <Card className="border-none shadow-sm bg-white overflow-hidden group">
                <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <Users className="h-6 w-6" />
+                      <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+                        <Users className="h-6 w-6" />
+                      </div>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-none font-bold">
-                      <TrendingUp className="h-3 w-3 mr-1" /> +12%
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Customers</h3>
-                    <p className="text-4xl font-black text-slate-900">{stats?.totalUsers || 0}</p>
-                  </div>
-               </CardContent>
-            </Card>
+                    <div className="space-y-1">
+                      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Customers</h3>
+                      <p className="text-4xl font-black text-slate-900">{stats?.totalUsers || 0}</p>
+                    </div>
+                 </CardContent>
+              </Card>
 
-            <Card className="border-none shadow-sm bg-white overflow-hidden group">
-               <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <Package className="h-6 w-6" />
+              <Card className="border-none shadow-sm bg-white overflow-hidden group">
+                 <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
+                        <Package className="h-6 w-6" />
+                      </div>
                     </div>
-                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-none font-bold">
-                      Active
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Orders</h3>
-                    <p className="text-4xl font-black text-slate-900">{stats?.totalOrders || 0}</p>
-                  </div>
-               </CardContent>
-            </Card>
+                    <div className="space-y-1">
+                      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Orders</h3>
+                      <p className="text-4xl font-black text-slate-900">{stats?.totalOrders || 0}</p>
+                    </div>
+                 </CardContent>
+              </Card>
 
-            <Card className="border-none shadow-sm bg-white overflow-hidden group">
-               <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <DollarSign className="h-6 w-6" />
+              <Card className="border-none shadow-sm bg-white overflow-hidden group">
+                 <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
+                        <DollarSign className="h-6 w-6" />
+                      </div>
                     </div>
-                    <div className="flex items-center text-emerald-600 text-xs font-bold">
-                       <ArrowUpRight className="h-3 w-3 mr-1" /> Real-time
+                    <div className="space-y-1">
+                      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Revenue</h3>
+                      <p className="text-4xl font-black text-slate-900">${stats?.totalRevenue.toLocaleString()}</p>
                     </div>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Revenue</h3>
-                    <p className="text-4xl font-black text-slate-900">${stats?.totalRevenue.toLocaleString()}</p>
-                  </div>
-               </CardContent>
-            </Card>
+                 </CardContent>
+              </Card>
 
-            <Card className="border-none shadow-sm bg-white overflow-hidden group">
-               <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <Clock className="h-6 w-6" />
+              <Card className="border-none shadow-sm bg-white overflow-hidden group">
+                 <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl group-hover:scale-110 transition-transform">
+                        <Clock className="h-6 w-6" />
+                      </div>
                     </div>
-                    <Badge variant="secondary" className="bg-purple-50 text-purple-700 border-none font-bold">
-                      Priority
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Pending Orders</h3>
-                    <p className="text-4xl font-black text-slate-900">{stats?.pendingOrders || 0}</p>
-                  </div>
+                    <div className="space-y-1">
+                      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Pending Orders</h3>
+                      <p className="text-4xl font-black text-slate-900">{stats?.pendingOrders || 0}</p>
+                    </div>
                </CardContent>
             </Card>
           </div>
