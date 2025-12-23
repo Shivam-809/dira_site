@@ -764,22 +764,24 @@ export default function AdminPage() {
                   />
 
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-bold">Price ($)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              className="rounded-xl"
+                      <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-bold text-primary">Selling Price ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                className="rounded-xl border-primary/20"
+                                placeholder="Final price customers pay"
                                 {...field}
-                                min="0"
-                                onChange={e => field.onChange(parseFloat(e.target.value))}
+                                min="0.01"
+                                onChange={e => field.onChange(Math.max(0.01, parseFloat(e.target.value) || 0))}
                               />
                             </FormControl>
+                            <FormDescription className="text-[10px]">What customers actually pay.</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -796,12 +798,13 @@ export default function AdminPage() {
                                 type="number"
                                 step="0.01"
                                 className="rounded-xl"
-                                placeholder="For discount display"
+                                placeholder="Old price (for discounts)"
                                 value={field.value || ""}
                                 min="0"
-                                onChange={e => field.onChange(e.target.value === "" ? null : parseFloat(e.target.value))}
+                                onChange={e => field.onChange(e.target.value === "" ? null : Math.max(0, parseFloat(e.target.value) || 0))}
                               />
                             </FormControl>
+                            <FormDescription className="text-[10px]">Crossed out price (optional).</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -819,9 +822,10 @@ export default function AdminPage() {
                                 className="rounded-xl"
                                 {...field}
                                 min="0"
-                                onChange={e => field.onChange(parseInt(e.target.value))}
+                                onChange={e => field.onChange(Math.max(0, parseInt(e.target.value) || 0))}
                               />
                             </FormControl>
+                            <FormDescription className="text-[10px]">Items available.</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
