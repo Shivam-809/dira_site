@@ -80,7 +80,7 @@ function HomeContent() {
               
               <div className="relative flex flex-col items-center">
                 <div className="relative mb-8 animate-float text-center">
-                  <h1 className="text-6xl md:text-8xl font-serif tracking-[1.2px] text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] font-cinzel font-[100]">
+                  <h1 className="text-6xl md:text-8xl font-serif tracking-[1.2px] text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] font-cinzel font-[600]">
                     Clarity. Healing. <br /> Conscious Alignment.
                   </h1>
                 </div>
