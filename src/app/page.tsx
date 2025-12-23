@@ -21,6 +21,8 @@ interface Product {
   imageUrl: string;
   stock: number;
   featured: boolean;
+  originalPrice?: number | null;
+  benefits?: string | null;
 }
 
 function HomeContent() {
