@@ -92,6 +92,8 @@ export default function AdminPage() {
       stock: 0,
       featured: false,
       imageUrl: "",
+      originalPrice: null,
+      benefits: "",
     },
   });
 
