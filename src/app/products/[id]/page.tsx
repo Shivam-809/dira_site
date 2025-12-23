@@ -117,15 +117,15 @@ export default function ProductDetailPage() {
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Product Image */}
-            <div className="relative aspect-square bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg overflow-hidden">
-              <img
-                src={`https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop`}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* Product Image */}
+              <div className="relative aspect-square bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg overflow-hidden">
+                <img
+                  src={product.imageUrl || `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop`}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
             {/* Product Details */}
             <div className="space-y-6">
