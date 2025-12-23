@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const filename = `product-${timestamp}-${randomString}.${extension}`;
 
     // Convert file to buffer and save
-    const bytes = await file.arrayBytes();
+    const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const filepath = join(uploadsDir, filename);
     await writeFile(filepath, buffer);
