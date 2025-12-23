@@ -27,6 +27,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     const emailVerified = searchParams.get("emailVerified");
