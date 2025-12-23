@@ -12,16 +12,19 @@ import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { useCurrency } from "@/hooks/use-currency";
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  imageUrl: string;
-  stock: number;
-  featured: boolean;
-}
+  interface Product {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    imageUrl: string;
+    stock: number;
+    featured: boolean;
+    originalPrice?: number | null;
+    benefits?: string | null;
+  }
+
 
 export default function ProductDetailPage() {
   const params = useParams();
