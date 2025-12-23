@@ -20,28 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { 
-          error: 'Invalid email format',
-          code: 'INVALID_EMAIL_FORMAT'
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate password length
-    if (password.length < 6) {
-      return NextResponse.json(
-        { 
-          error: 'Password must be at least 6 characters',
-          code: 'INVALID_PASSWORD_LENGTH'
-        },
-        { status: 400 }
-      );
-    }
+    const normalizedEmail = email.toLowerCase().trim();
 
     // Query admin_account table to find admin by email (stored in accountId)
     const adminAccountResult = await db
@@ -57,7 +36,7 @@ export async function POST(request: NextRequest) {
       })
       .from(adminAccount)
       .innerJoin(admin, eq(adminAccount.adminId, admin.id))
-      .where(eq(adminAccount.accountId, email))
+      .where(eq(adminAccount.accountId, normalizedEmail))
       .limit(1);
 
     // If no admin found with that email
