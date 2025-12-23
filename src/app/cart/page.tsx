@@ -240,20 +240,21 @@ export default function CartPage() {
                   <CardContent className="p-6 space-y-4">
                     <h2 className="text-2xl font-bold">Order Summary</h2>
                     
-                    <div className="space-y-2 border-t pt-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subtotal</span>
-                        <span>${calculateTotal().toFixed(2)}</span>
+                      <div className="space-y-2 border-t pt-4">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Subtotal</span>
+                          <span>{formatPrice(calculateTotal())}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Shipping</span>
+                          <span>Free</span>
+                        </div>
+                        <div className="flex justify-between text-lg font-bold border-t pt-2">
+                          <span>Total</span>
+                          <span className="text-primary">{formatPrice(calculateTotal())}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Shipping</span>
-                        <span>Free</span>
-                      </div>
-                      <div className="flex justify-between text-lg font-bold border-t pt-2">
-                        <span>Total</span>
-                        <span className="text-primary">${calculateTotal().toFixed(2)}</span>
-                      </div>
-                    </div>
+
 
                     <Link href="/checkout">
                       <Button className="w-full" size="lg">
