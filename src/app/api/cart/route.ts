@@ -110,6 +110,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check product stock
+    const productData = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, productIdInt))
+      .limit(1);
+
+    if (productData.length === 0) {
+      return NextResponse.json(
+        { error: 'Product not found', code: 'PRODUCT_NOT_FOUND' },
+        { status: 404 }
+      );
+    }
+
+    const availableStock = productData[0].stock || 0;
+
     // Validate quantity if provided
     let quantityValue = 1; // default
     if (quantity !== undefined) {
@@ -120,6 +136,14 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      
+      if (quantityInt > availableStock) {
+        return NextResponse.json(
+          { error: `Only ${availableStock} items available in stock`, code: 'INSUFFICIENT_STOCK' },
+          { status: 400 }
+        );
+      }
+      
       quantityValue = quantityInt;
     }
 
