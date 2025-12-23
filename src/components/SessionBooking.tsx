@@ -284,18 +284,19 @@ export default function SessionBooking() {
                 <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50">
                   <SelectValue placeholder="Choose a session type" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-primary/20">
-                  {SESSION_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{type.label} - ₹{type.price}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {type.description} • {type.duration} min
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                  <SelectContent className="bg-card border-primary/20">
+                    {SESSION_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{type.label} - {formatPrice(type.price)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {type.description} • {type.duration} min
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+
               </Select>
             </div>
 
