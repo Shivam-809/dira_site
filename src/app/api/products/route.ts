@@ -179,7 +179,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, category, imageUrl, stock, featured } = body;
+    const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits } = body;
 
     // Validate price if provided
     if (price !== undefined && price !== null) {
