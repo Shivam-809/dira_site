@@ -12,6 +12,7 @@ import { CurrencyProvider } from "@/hooks/use-currency";
 const cinzel = Cinzel({
   subsets: ['latin'],
   variable: '--font-cinzel',
+  weight: ['400', '500', '600', '700', '800', '900'],
 });
 
 const cormorant = Cormorant_Garamond({
