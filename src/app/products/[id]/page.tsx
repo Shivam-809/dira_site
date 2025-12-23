@@ -32,7 +32,10 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
 
-  useEffect(() => {
+    const { formatPrice } = useCurrency();
+
+    useEffect(() => {
+
     fetchProduct();
   }, [params.id]);
 
