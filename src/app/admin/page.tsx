@@ -775,36 +775,80 @@ export default function AdminPage() {
                               type="number"
                               step="0.01"
                               className="rounded-xl"
-                              {...field}
-                              onChange={e => field.onChange(parseFloat(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                                {...field}
+                                min="0"
+                                onChange={e => field.onChange(parseFloat(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="stock"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-bold">Inventory</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              className="rounded-xl"
-                              {...field}
-                              onChange={e => field.onChange(parseInt(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="originalPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-bold">Original Price ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                className="rounded-xl"
+                                placeholder="For discount display"
+                                value={field.value || ""}
+                                min="0"
+                                onChange={e => field.onChange(e.target.value === "" ? null : parseFloat(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="stock"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-bold">Inventory</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                className="rounded-xl"
+                                {...field}
+                                min="0"
+                                onChange={e => field.onChange(parseInt(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                <FormField
+                  control={form.control}
+                  name="benefits"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-bold">Sacred Benefits</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="E.g. Free shipping, 15% off next reading, Gift wrapped" 
+                          className="rounded-xl" 
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
 
               <FormField
                 control={form.control}
