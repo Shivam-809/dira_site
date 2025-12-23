@@ -34,7 +34,10 @@ export default function CartPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    const { formatPrice } = useCurrency();
+
+    useEffect(() => {
+
     if (!isPending) {
       if (!session?.user) {
         toast.error("Please login to view your cart");
