@@ -195,8 +195,10 @@ export default function AdminOrdersPage() {
     const colors: Record<string, string> = {
       pending: "bg-yellow-500",
       paid: "bg-green-500",
-      shipped: "bg-blue-500",
-      delivered: "bg-purple-500",
+      placed: "bg-blue-400",
+      processing: "bg-indigo-500",
+      shipped: "bg-blue-600",
+      delivered: "bg-emerald-600",
       cancelled: "bg-red-500",
     };
     return colors[status] || "bg-gray-500";
