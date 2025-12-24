@@ -282,13 +282,6 @@ export default function Navbar() {
               Shop
             </Link>
             <Link
-              href="/track-order"
-              className="block px-4 py-2 text-sm font-medium hover:bg-primary/10 rounded-md tracking-wider uppercase"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Track Order
-            </Link>
-            <Link
               href="/contact"
               className="block px-4 py-2 text-sm font-medium hover:bg-primary/10 rounded-md tracking-wider uppercase"
               onClick={() => setMobileMenuOpen(false)}
