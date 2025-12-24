@@ -164,10 +164,10 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses = ['pending', 'paid', 'placed', 'processing', 'shipped', 'delivered', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ 
-        error: 'Invalid status. Must be one of: pending, paid, shipped, delivered, cancelled', 
+        error: 'Invalid status. Must be one of: pending, paid, placed, processing, shipped, delivered, cancelled', 
         code: 'INVALID_STATUS' 
       }, { status: 400 });
     }
