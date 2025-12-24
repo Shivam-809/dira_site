@@ -67,8 +67,8 @@ export async function GET(request: NextRequest) {
 
       const parsedOrder = {
         ...order,
-        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
-        shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []),
+        shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : (order.shippingAddress || {}),
         tracking
       };
 
