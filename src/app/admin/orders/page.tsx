@@ -482,9 +482,9 @@ export default function AdminOrdersPage() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-3">
                                  <CardTitle className="text-xl">Order #{order.id}</CardTitle>
-                                 <Badge className={`${getStatusColor(order.status)} text-white border-0 shadow-sm`}>
-                                   {order.status.toUpperCase()}
-                                 </Badge>
+                                   <Badge className={`${getStatusColor(order.status)} text-white border-0 shadow-sm`}>
+                                     {(order.status || 'unknown').toUpperCase()}
+                                   </Badge>
                               </div>
                               <div className="text-sm text-muted-foreground space-y-1 font-medium">
                                 <p className="flex items-center gap-2">
