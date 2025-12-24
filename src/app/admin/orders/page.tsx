@@ -278,6 +278,10 @@ export default function AdminOrdersPage() {
       shipped: "bg-blue-600",
       delivered: "bg-emerald-600",
       cancelled: "bg-red-500",
+      'Order Packed': "bg-orange-400",
+      'Dispatched': "bg-blue-500",
+      'In Transit': "bg-blue-700",
+      'Out for Delivery': "bg-purple-500",
     };
     return colors[status] || "bg-gray-500";
   };
