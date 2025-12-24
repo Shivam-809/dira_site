@@ -797,7 +797,7 @@ export default function AdminPage() {
                           name="originalPrice"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-bold">Original Price ($)</FormLabel>
+                              <FormLabel className="font-bold">Original Price (₹)</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
