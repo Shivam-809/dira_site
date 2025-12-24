@@ -634,15 +634,16 @@ export default function AdminPage() {
                         {product.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-4 pt-0 space-y-4">
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-2xl font-black text-slate-900">${product.price.toFixed(2)}</p>
-                          <p className={`text-xs font-bold ${product.stock > 10 ? 'text-emerald-500' : 'text-amber-500'}`}>
-                            {product.stock} in stock
-                          </p>
+                      <CardContent className="p-4 pt-0 space-y-4">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-2xl font-black text-slate-900">{formatPrice(product.price)}</p>
+                            <p className={`text-xs font-bold ${product.stock > 10 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                              {product.stock} in stock
+                            </p>
+                          </div>
                         </div>
-                      </div>
+
 
                       <div className="flex gap-2 pt-2">
                         <Button
