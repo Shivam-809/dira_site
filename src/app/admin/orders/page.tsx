@@ -271,15 +271,67 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleBulkStatusChange = async (newStatus: string) => {
+    if (selectedOrders.length === 0) return;
+    
+    setBulkActionLoading(true);
+    try {
+      const token = localStorage.getItem("admin_token");
+      const promises = selectedOrders.map(orderId => 
+        fetch("/api/admin/orders", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderId, status: newStatus }),
+        })
+      );
+
+      const results = await Promise.all(promises);
+      const successCount = results.filter(r => r.ok).length;
+      
+      if (successCount > 0) {
+        toast.success(`Updated ${successCount} orders successfully!`);
+        setSelectedOrders([]);
+        fetchOrders();
+      } else {
+        toast.error("Failed to update orders");
+      }
+    } catch (error) {
+      toast.error("Error performing bulk update");
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const toggleSelectOrder = (orderId: number) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId) 
+        : [...prev, orderId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrders.length === paginatedOrders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(paginatedOrders.map(o => o.id));
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       pending: "bg-yellow-500",
       paid: "bg-green-500",
       placed: "bg-blue-400",
+      confirmed: "bg-sky-500",
       processing: "bg-indigo-500",
       shipped: "bg-blue-600",
       delivered: "bg-emerald-600",
       cancelled: "bg-red-500",
+      refunded: "bg-pink-600",
       'Order Packed': "bg-orange-400",
       'Dispatched': "bg-blue-500",
       'In Transit': "bg-blue-700",
