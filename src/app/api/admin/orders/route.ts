@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { orders, user, orderTracking } from '@/db/schema';
 import { eq, like, or, and, desc } from 'drizzle-orm';
 import { verifyAdminRequest } from '@/lib/admin-auth';
+import { sendOrderStatusUpdateEmail } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
   try {
