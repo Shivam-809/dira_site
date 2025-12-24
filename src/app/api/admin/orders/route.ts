@@ -251,6 +251,28 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedOrder = updated[0];
+    
+    // Fetch user info for email notification
+    try {
+      const orderUser = await db.select()
+        .from(user)
+        .where(eq(user.id, updatedOrder.userId))
+        .limit(1);
+
+      if (orderUser.length > 0) {
+        await sendOrderStatusUpdateEmail({
+          to: orderUser[0].email,
+          userName: orderUser[0].name,
+          orderId: updatedOrder.id,
+          newStatus: finalStatus,
+          trackingLink: `${request.nextUrl.origin}/track-order?order_id=${updatedOrder.id}`
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send status update email:', emailError);
+      // Don't fail the request if email fails
+    }
+
     const parsedOrder = {
       ...updatedOrder,
       items: typeof updatedOrder.items === 'string' ? JSON.parse(updatedOrder.items) : updatedOrder.items,
