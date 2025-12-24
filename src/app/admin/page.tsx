@@ -419,10 +419,11 @@ export default function AdminPage() {
                         <DollarSign className="h-6 w-6" />
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Revenue</h3>
-                      <p className="text-4xl font-black text-slate-900">${stats?.totalRevenue.toLocaleString()}</p>
-                    </div>
+                      <div className="space-y-1">
+                        <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Revenue</h3>
+                        <p className="text-4xl font-black text-slate-900">{formatPrice(stats?.totalRevenue || 0)}</p>
+                      </div>
+
                  </CardContent>
               </Card>
 
