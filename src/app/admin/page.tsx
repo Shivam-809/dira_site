@@ -83,6 +83,8 @@ export default function AdminPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploading, setUploading] = useState(false);
 
+  const { formatPrice } = useCurrency();
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
