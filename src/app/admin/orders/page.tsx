@@ -468,77 +468,83 @@ export default function AdminOrdersPage() {
           ) : (
             <>
               <div className="space-y-6">
-                {paginatedOrders.map((order) => (
-                  <Card key={order.id} className="overflow-hidden border-primary/10 hover:border-primary/20 transition-all bg-white shadow-sm">
-                    <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-3">
-                             <CardTitle className="text-xl">Order #{order.id}</CardTitle>
-                             <Badge className={`${getStatusColor(order.status)} text-white border-0 shadow-sm`}>
-                               {order.status.toUpperCase()}
-                             </Badge>
+                  {paginatedOrders.map((order) => (
+                    <Card key={order.id} className={`overflow-hidden transition-all bg-white shadow-sm border-l-4 ${selectedOrders.includes(order.id) ? 'border-l-primary ring-2 ring-primary/20 bg-primary/5' : 'border-l-transparent border-primary/10 hover:border-primary/20'}`}>
+                      <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                          <div className="flex gap-4 items-start w-full sm:w-auto">
+                            <input 
+                              type="checkbox" 
+                              className="mt-2 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={selectedOrders.includes(order.id)}
+                              onChange={() => toggleSelectOrder(order.id)}
+                            />
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-3">
+                                 <CardTitle className="text-xl">Order #{order.id}</CardTitle>
+                                 <Badge className={`${getStatusColor(order.status)} text-white border-0 shadow-sm`}>
+                                   {order.status.toUpperCase()}
+                                 </Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground space-y-1 font-medium">
+                                <p className="flex items-center gap-2">
+                                  <User className="h-3.5 w-3.5 text-primary/60" /> {order.user?.name || "Unknown"} ({order.user?.email || "N/A"})
+                                </p>
+                                <p className="flex items-center gap-2">
+                                  <Clock className="h-3.5 w-3.5 text-primary/60" />
+                                  {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground space-y-1 font-medium">
-                            <p className="flex items-center gap-2">
-                              <User className="h-3.5 w-3.5 text-primary/60" /> {order.user?.name || "Unknown"} ({order.user?.email || "N/A"})
-                            </p>
-                            <p className="flex items-center gap-2">
-                              <Clock className="h-3.5 w-3.5 text-primary/60" />
-                              {new Date(order.createdAt).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
+                          <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="bg-primary/5 border-primary/20 text-primary hover:bg-primary hover:text-white transition-colors"
+                                onClick={() => handleManageTracking(order)}
+                              >
+                                <Truck className="h-4 w-4 mr-2" />
+                                Tracking
+                              </Button>
+                              <Select
+                                value={order.status}
+                                onValueChange={(value) => handleStatusChange(order.id, value)}
+                              >
+                                <SelectTrigger className="w-[140px] h-9 bg-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="paid">Paid</SelectItem>
+                                    <SelectItem value="placed">Placed</SelectItem>
+                                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                                    <SelectItem value="processing">Processing</SelectItem>
+                                    <SelectItem value="shipped">Shipped</SelectItem>
+                                    <SelectItem value="delivered">Delivered</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    <SelectItem value="refunded">Refunded</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-9 w-9 text-destructive hover:bg-destructive hover:text-white border-destructive/20"
+                                onClick={() => handleDeleteRequest(order)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="bg-primary/5 border-primary/20 text-primary hover:bg-primary hover:text-white transition-colors"
-                              onClick={() => handleManageTracking(order)}
-                            >
-                              <Truck className="h-4 w-4 mr-2" />
-                              Tracking details
-                            </Button>
-                            <Select
-                              value={order.status}
-                              onValueChange={(value) => handleStatusChange(order.id, value)}
-                            >
-                              <SelectTrigger className="w-[140px] h-9 bg-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="paid">Paid</SelectItem>
-                                  <SelectItem value="placed">Placed</SelectItem>
-                                  <SelectItem value="processing">Processing</SelectItem>
-                                  <SelectItem value="Order Packed">Order Packed</SelectItem>
-                                  <SelectItem value="Dispatched">Dispatched</SelectItem>
-                                  <SelectItem value="In Transit">In Transit</SelectItem>
-                                  <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                                  <SelectItem value="shipped">Shipped</SelectItem>
-                                  <SelectItem value="delivered">Delivered</SelectItem>
-                                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button 
-                              variant="outline" 
-                              size="icon" 
-                              className="h-9 w-9 text-destructive hover:bg-destructive hover:text-white border-destructive/20"
-                              onClick={() => handleDeleteRequest(order)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
                     <CardContent className="pt-6">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
