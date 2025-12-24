@@ -146,12 +146,12 @@ export async function GET(request: NextRequest) {
         .where(eq(orderTracking.orderId, order.id))
         .orderBy(desc(orderTracking.createdAt));
 
-      return {
-        ...order,
-        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
-        shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress,
-        tracking
-      };
+        return {
+          ...order,
+          items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []),
+          shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : (order.shippingAddress || {}),
+          tracking
+        };
     }));
 
     return NextResponse.json(parsedResults, { status: 200 });
