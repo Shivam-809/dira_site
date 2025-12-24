@@ -512,7 +512,7 @@ export default function AdminPage() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-black text-slate-900">${order.totalAmount.toFixed(2)}</p>
+                              <p className="font-black text-slate-900">{formatPrice(order.totalAmount)}</p>
                               <Badge className={`${getStatusColor(order.status)} text-white h-5 text-[10px] uppercase font-black px-2 mt-1`} variant="secondary">
                                 {order.status}
                               </Badge>
