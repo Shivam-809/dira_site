@@ -132,13 +132,10 @@ export default function Navbar() {
                 <Link href="/shop" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
                   Shop
                 </Link>
-                <Link href="/track-order" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                  Track Order
-                </Link>
-                <Link href="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                  Contact
-                </Link>
-              </div>
+                  <Link href="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    Contact
+                  </Link>
+                </div>
 
 
 
