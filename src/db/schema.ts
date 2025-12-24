@@ -114,6 +114,8 @@ export const orders = sqliteTable('orders', {
   status: text('status').notNull().default('pending'),
   paymentIntentId: text('payment_intent_id'),
   shippingAddress: text('shipping_address', { mode: 'json' }),
+  courierName: text('courier_name'),
+  trackingId: text('tracking_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
