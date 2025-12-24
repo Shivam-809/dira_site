@@ -377,37 +377,79 @@ export default function AdminOrdersPage() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by customer name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white"
-              />
+          {/* Filters & Bulk Actions */}
+          <div className="flex flex-col gap-6 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search by customer name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px] bg-white">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="placed">Placed</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="shipped">Shipped</SelectItem>
+                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+              </Select>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px] bg-white">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="placed">Placed</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="Order Packed">Order Packed</SelectItem>
-                  <SelectItem value="Dispatched">Dispatched</SelectItem>
-                  <SelectItem value="In Transit">In Transit</SelectItem>
-                  <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-            </Select>
+
+            {selectedOrders.length > 0 && (
+              <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-primary text-white">{selectedOrders.length} selected</Badge>
+                  <p className="text-sm font-medium text-primary">Bulk actions for selected orders</p>
+                </div>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <Select onValueChange={handleBulkStatusChange} disabled={bulkActionLoading}>
+                    <SelectTrigger className="w-full sm:w-[200px] bg-white">
+                      <SelectValue placeholder="Update status to..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Mark as Confirmed</SelectItem>
+                      <SelectItem value="processing">Mark as Processing</SelectItem>
+                      <SelectItem value="shipped">Mark as Shipped</SelectItem>
+                      <SelectItem value="delivered">Mark as Delivered</SelectItem>
+                      <SelectItem value="cancelled">Mark as Cancelled</SelectItem>
+                      <SelectItem value="refunded">Mark as Refunded</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSelectedOrders([])}
+                    disabled={bulkActionLoading}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 mb-4 px-2">
+            <input 
+              type="checkbox" 
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              checked={selectedOrders.length === paginatedOrders.length && paginatedOrders.length > 0}
+              onChange={toggleSelectAll}
+            />
+            <span className="text-sm font-medium text-slate-500">Select All on Page</span>
           </div>
 
           {/* Orders List */}
