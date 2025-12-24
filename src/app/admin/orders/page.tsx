@@ -417,15 +417,19 @@ export default function AdminOrdersPage() {
                               <SelectTrigger className="w-[140px] h-9 bg-white">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="paid">Paid</SelectItem>
-                                <SelectItem value="placed">Placed</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="paid">Paid</SelectItem>
+                                  <SelectItem value="placed">Placed</SelectItem>
+                                  <SelectItem value="processing">Processing</SelectItem>
+                                  <SelectItem value="Order Packed">Order Packed</SelectItem>
+                                  <SelectItem value="Dispatched">Dispatched</SelectItem>
+                                  <SelectItem value="In Transit">In Transit</SelectItem>
+                                  <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
+                                  <SelectItem value="shipped">Shipped</SelectItem>
+                                  <SelectItem value="delivered">Delivered</SelectItem>
+                                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
                             </Select>
                             <Button 
                               variant="outline" 
