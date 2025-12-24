@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Separator } from "@/components/ui/separator";
+import { useCurrency } from "@/hooks/use-currency";
 
 const productSchema = z.object({
   name: z.string().min(2, "Product name is required"),
