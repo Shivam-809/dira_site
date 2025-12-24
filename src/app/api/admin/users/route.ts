@@ -155,7 +155,7 @@ export async function PUT(request: NextRequest) {
       updates.email = sanitizedEmail;
     }
 
-    if (password !== undefined) {
+    if (password !== undefined && password !== "") {
       if (password.length < 6) {
         return NextResponse.json({ 
           error: "Password must be at least 6 characters long",
