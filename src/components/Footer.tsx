@@ -47,6 +47,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/track-order" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Track Order
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Contact
                 </Link>
@@ -89,7 +94,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/orders" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/track-order" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Track Order
                 </Link>
               </li>
