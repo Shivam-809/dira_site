@@ -181,10 +181,22 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const validStatuses = ['pending', 'paid', 'placed', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses = [
+      'pending', 
+      'paid', 
+      'placed', 
+      'processing', 
+      'shipped', 
+      'delivered', 
+      'cancelled',
+      'Order Packed',
+      'Dispatched',
+      'In Transit',
+      'Out for Delivery'
+    ];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ 
-        error: 'Invalid status', 
+        error: `Invalid status. Received: ${status}. Must be one of: ${validStatuses.join(', ')}`, 
         code: 'INVALID_STATUS' 
       }, { status: 400 });
     }
