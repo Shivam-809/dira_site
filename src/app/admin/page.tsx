@@ -774,7 +774,7 @@ export default function AdminPage() {
                           name="price"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-bold text-primary">Selling Price ($)</FormLabel>
+                              <FormLabel className="font-bold text-primary">Selling Price (₹)</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
