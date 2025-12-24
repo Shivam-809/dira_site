@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { orders } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { orders, orderTracking } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,8 +43,11 @@ export async function GET(request: NextRequest) {
 
     const order = result[0];
 
-    // Mask the status for display if needed, or just return as is
-    // The user requested: order status, amount, and last updated time.
+    // Fetch detailed tracking logs
+    const trackingLogs = await db.select()
+      .from(orderTracking)
+      .where(eq(orderTracking.orderId, order.id))
+      .orderBy(desc(orderTracking.createdAt));
 
     return NextResponse.json({
       orderId: order.id,
@@ -52,6 +55,7 @@ export async function GET(request: NextRequest) {
       amount: order.totalAmount,
       lastUpdated: order.updatedAt,
       placedAt: order.createdAt,
+      tracking: trackingLogs
     }, { status: 200 });
 
   } catch (error) {
