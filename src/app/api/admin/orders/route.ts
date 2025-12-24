@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { orders, user } from '@/db/schema';
+import { orders, user, orderTracking } from '@/db/schema';
 import { eq, like, or, and, desc } from 'drizzle-orm';
 import { verifyAdminRequest } from '@/lib/admin-auth';
 
@@ -57,10 +57,18 @@ export async function GET(request: NextRequest) {
       }
 
       const order = result[0];
+      
+      // Fetch tracking for this order
+      const tracking = await db.select()
+        .from(orderTracking)
+        .where(eq(orderTracking.orderId, order.id))
+        .orderBy(desc(orderTracking.createdAt));
+
       const parsedOrder = {
         ...order,
         items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
         shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress,
+        tracking
       };
 
       return NextResponse.json(parsedOrder, { status: 200 });
@@ -116,10 +124,19 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    const parsedResults = results.map(order => ({
-      ...order,
-      items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
-      shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress,
+    // Fetch tracking for all results
+    const parsedResults = await Promise.all(results.map(async (order) => {
+      const tracking = await db.select()
+        .from(orderTracking)
+        .where(eq(orderTracking.orderId, order.id))
+        .orderBy(desc(orderTracking.createdAt));
+
+      return {
+        ...order,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items,
+        shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress,
+        tracking
+      };
     }));
 
     return NextResponse.json(parsedResults, { status: 200 });
@@ -167,7 +184,7 @@ export async function PUT(request: NextRequest) {
     const validStatuses = ['pending', 'paid', 'placed', 'processing', 'shipped', 'delivered', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ 
-        error: 'Invalid status. Must be one of: pending, paid, placed, processing, shipped, delivered, cancelled', 
+        error: 'Invalid status', 
         code: 'INVALID_STATUS' 
       }, { status: 400 });
     }
@@ -255,10 +272,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete order tracking info first
-    const { orderTracking } = await import('@/db/schema');
-    if (orderTracking) {
-      await db.delete(orderTracking).where(eq(orderTracking.orderId, orderIdNum));
-    }
+    await db.delete(orderTracking).where(eq(orderTracking.orderId, orderIdNum));
 
     // Delete the order
     await db.delete(orders).where(eq(orders.id, orderIdNum));
