@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Plus, Edit, Trash2, Loader2, Shield, Users, Package, DollarSign, Clock, ShoppingBag, UserCog, Upload, X, ArrowUpRight, TrendingUp, Inbox, LayoutDashboard, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Shield, Users, Package, IndianRupee, Clock, ShoppingBag, UserCog, Upload, X, ArrowUpRight, TrendingUp, Inbox, LayoutDashboard, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -414,11 +414,11 @@ export default function AdminPage() {
 
               <Card className="border-none shadow-sm bg-white overflow-hidden group">
                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                        <DollarSign className="h-6 w-6" />
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
+                          <IndianRupee className="h-6 w-6" />
+                        </div>
                       </div>
-                    </div>
                       <div className="space-y-1">
                         <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Revenue</h3>
                         <p className="text-4xl font-black text-slate-900">{formatPrice(stats?.totalRevenue || 0)}</p>
