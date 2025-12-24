@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  transpilePackages: ["better-auth"],
 };
 
 export default nextConfig;
