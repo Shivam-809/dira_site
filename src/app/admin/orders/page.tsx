@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Package, Loader2, Search, ChevronLeft, ChevronRight, Trash2, Eye, Truck, CreditCard, User, ListChecks, PlusCircle, MapPin, Info } from "lucide-react";
+import { Package, Loader2, Search, ChevronLeft, ChevronRight, Trash2, Eye, Truck, CreditCard, User, ListChecks, PlusCircle, MapPin, Info, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { useCurrency } from "@/hooks/use-currency";
