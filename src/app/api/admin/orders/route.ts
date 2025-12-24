@@ -172,20 +172,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { orderId, status } = body;
+    const { orderId, orderIds, status, courierName, trackingId } = body;
 
-    if (!orderId) {
+    if (!orderId && (!orderIds || !Array.isArray(orderIds))) {
       return NextResponse.json({ 
-        error: 'Order ID is required', 
+        error: 'Order ID or Order IDs array is required', 
         code: 'MISSING_ORDER_ID' 
-      }, { status: 400 });
-    }
-
-    const orderIdNum = parseInt(orderId);
-    if (isNaN(orderIdNum)) {
-      return NextResponse.json({ 
-        error: 'Valid order ID is required', 
-        code: 'INVALID_ORDER_ID' 
       }, { status: 400 });
     }
 
@@ -196,90 +188,87 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
+    const idsToUpdate = orderIds || [orderId];
+    const validIds = idsToUpdate.map((id: any) => parseInt(id)).filter((id: number) => !isNaN(id));
+
+    if (validIds.length === 0) {
+      return NextResponse.json({ 
+        error: 'Valid order IDs are required', 
+        code: 'INVALID_ORDER_ID' 
+      }, { status: 400 });
+    }
+
     const validStatuses = [
-      'pending', 
-      'paid', 
-      'placed', 
-      'confirmed',
-      'processing', 
-      'shipped', 
-      'delivered', 
-      'cancelled',
-      'refunded',
-      'Order Packed',
-      'Dispatched',
-      'In Transit',
-      'Out for Delivery'
+      'PLACED', 
+      'CONFIRMED',
+      'PROCESSING', 
+      'SHIPPED', 
+      'DELIVERED', 
+      'CANCELLED',
+      'REFUNDED'
     ];
     
-    // Normalize status to lowercase for standardized ones, but keep legacy as is
-    const normalizedStatus = status.toLowerCase();
-    const finalStatus = validStatuses.includes(status) ? status : (validStatuses.includes(normalizedStatus) ? normalizedStatus : status);
-
-    if (!validStatuses.includes(finalStatus)) {
+    const upperStatus = status.toUpperCase();
+    if (!validStatuses.includes(upperStatus)) {
       return NextResponse.json({ 
         error: `Invalid status. Received: ${status}. Must be one of: ${validStatuses.join(', ')}`, 
         code: 'INVALID_STATUS' 
       }, { status: 400 });
     }
 
-    const existingOrder = await db.select()
-      .from(orders)
-      .where(eq(orders.id, orderIdNum))
-      .limit(1);
+    const updatedOrders = [];
 
-    if (existingOrder.length === 0) {
-      return NextResponse.json({ 
-        error: 'Order not found', 
-        code: 'ORDER_NOT_FOUND' 
-      }, { status: 404 });
-    }
+    for (const id of validIds) {
+      const updated = await db.update(orders)
+        .set({
+          status: upperStatus,
+          courierName: courierName || undefined,
+          trackingId: trackingId || undefined,
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(orders.id, id))
+        .returning();
 
-    const updated = await db.update(orders)
-      .set({
-        status: finalStatus,
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(orders.id, orderIdNum))
-      .returning();
+      if (updated.length > 0) {
+        const order = updated[0];
+        updatedOrders.push(order);
 
-    if (updated.length === 0) {
-      return NextResponse.json({ 
-        error: 'Failed to update order', 
-        code: 'UPDATE_FAILED' 
-      }, { status: 500 });
-    }
-
-    const updatedOrder = updated[0];
-    
-    // Fetch user info for email notification
-    try {
-      const orderUser = await db.select()
-        .from(user)
-        .where(eq(user.id, updatedOrder.userId))
-        .limit(1);
-
-      if (orderUser.length > 0) {
-        await sendOrderStatusUpdateEmail({
-          to: orderUser[0].email,
-          userName: orderUser[0].name,
-          orderId: updatedOrder.id,
-          newStatus: finalStatus,
-          trackingLink: `${request.nextUrl.origin}/track-order?order_id=${updatedOrder.id}`
+        // Add tracking log
+        await db.insert(orderTracking).values({
+          orderId: order.id,
+          status: upperStatus,
+          description: `Order status updated to ${upperStatus}${courierName ? ` via ${courierName}` : ''}${trackingId ? ` (Tracking: ${trackingId})` : ''}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
+
+        // Send email
+        try {
+          const orderUser = await db.select()
+            .from(user)
+            .where(eq(user.id, order.userId))
+            .limit(1);
+
+          if (orderUser.length > 0) {
+            await sendOrderStatusUpdateEmail({
+              to: orderUser[0].email,
+              userName: orderUser[0].name,
+              orderId: order.id,
+              newStatus: upperStatus,
+              trackingLink: `${request.nextUrl.origin}/track-order?order_id=${order.id}`
+            });
+          }
+        } catch (emailError) {
+          console.error(`Failed to send email for order ${id}:`, emailError);
+        }
       }
-    } catch (emailError) {
-      console.error('Failed to send status update email:', emailError);
-      // Don't fail the request if email fails
     }
 
-    const parsedOrder = {
-      ...updatedOrder,
-      items: typeof updatedOrder.items === 'string' ? JSON.parse(updatedOrder.items) : updatedOrder.items,
-      shippingAddress: typeof updatedOrder.shippingAddress === 'string' ? JSON.parse(updatedOrder.shippingAddress) : updatedOrder.shippingAddress,
-    };
-
-    return NextResponse.json(parsedOrder, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      updatedCount: updatedOrders.length,
+      orders: updatedOrders
+    }, { status: 200 });
   } catch (error) {
     console.error('PUT error:', error);
     return NextResponse.json({ 
