@@ -5,26 +5,26 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ShoppingCart, Minus, Plus } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { useCurrency } from "@/hooks/use-currency";
 
-  interface Product {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-    imageUrl: string;
-    stock: number;
-    featured: boolean;
-    originalPrice?: number | null;
-    benefits?: string | null;
-  }
-
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl: string;
+  stock: number;
+  featured: boolean;
+  originalPrice?: number | null;
+  benefits?: string | null;
+}
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -35,10 +35,9 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
 
-    const { formatPrice } = useCurrency();
+  const { formatPrice } = useCurrency();
 
-    useEffect(() => {
-
+  useEffect(() => {
     fetchProduct();
   }, [params.id]);
 
@@ -120,125 +119,129 @@ export default function ProductDetailPage() {
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {/* Product Image */}
-              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-                <img
-                  src={product.imageUrl || `https://placehold.co/800x800/f5f5f5/333333?text=${encodeURIComponent(product.name)}`}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            {/* Product Image */}
+            <div className="relative aspect-square bg-muted rounded-2xl overflow-hidden shadow-2xl gold-border">
+              <img
+                src={product.imageUrl || `https://placehold.co/800x800/f5f5f5/333333?text=${encodeURIComponent(product.name)}`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+              {product.stock <= 0 && (
+                <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                  <Badge variant="destructive" className="text-xl px-8 py-3 rounded-full font-serif font-bold tracking-[0.2em] uppercase shadow-2xl">
+                    Out of Stock
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center gap-4 mb-4">
+                  <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">{product.name}</h1>
+                  {product.featured && (
+                    <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 font-serif italic h-7">Featured</Badge>
+                  )}
+                </div>
+                <p className="text-sm text-primary font-serif italic uppercase tracking-[0.2em] border-l-2 border-primary/30 pl-4 py-1">
+                  {product.category}
+                </p>
               </div>
 
-              {/* Product Details */}
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-4xl font-bold">{product.name}</h1>
-                    {product.stock <= 0 && (
-                      <Badge variant="destructive" className="uppercase font-bold tracking-widest px-3 py-1">Out of Stock</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wide font-serif italic">
-                    {product.category}
-                  </p>
+              <div className="flex items-baseline gap-6">
+                <div className="text-5xl font-serif font-bold text-primary">
+                  {formatPrice(product.price)}
                 </div>
-
-                  <div className="flex items-baseline gap-4">
-                    <div className="text-4xl font-bold text-primary">
-                      {formatPrice(product.originalPrice && product.originalPrice < product.price ? product.originalPrice : product.price)}
-                    </div>
-                    {product.originalPrice && product.originalPrice !== product.price && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl text-muted-foreground line-through decoration-primary/30">
-                          {formatPrice(product.originalPrice < product.price ? product.price : product.originalPrice)}
-                        </span>
-                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-sm font-bold">
-                          {Math.round((Math.abs(product.originalPrice - product.price) / Math.max(product.originalPrice, product.price)) * 100)}% OFF
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                <p className="text-muted-foreground leading-relaxed text-lg italic font-serif">
-                  {product.description}
-                </p>
-
-                {product.benefits && (
-                  <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-3">
-                    <h3 className="font-bold text-primary flex items-center gap-2">
-                      <Plus className="h-4 w-4" /> Sacred Benefits
-                    </h3>
-                    <div className="text-muted-foreground flex items-start gap-2 italic">
-                      <span>✨</span>
-                      <span>{product.benefits}</span>
-                    </div>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl text-muted-foreground line-through decoration-primary/30 font-serif">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                    <Badge className="bg-primary text-primary-foreground font-bold px-3 py-1">
+                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                    </Badge>
                   </div>
                 )}
+              </div>
 
+              <p className="text-muted-foreground leading-relaxed text-xl font-serif italic">
+                {product.description}
+              </p>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">Availability:</span>
-                      <span className={product.stock > 0 ? "text-green-600" : "text-red-600"}>
-                        {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">Quantity:</span>
-                      <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            disabled={quantity <= 1}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                            <Input
-                              type="number"
-                              value={quantity}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 1;
-                                const stock = product.stock || 0;
-                                setQuantity(Math.min(stock, Math.max(1, val)));
-                              }}
-                              className="w-20 text-center"
-                              min="1"
-                              max={product.stock}
-                            />
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              if (quantity < product.stock) {
-                                setQuantity(quantity + 1);
-                              } else {
-                                toast.error(`Only ${product.stock} items in stock`);
-                              }
-                            }}
-                            disabled={quantity >= product.stock}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                      </div>
-                    </div>
+              {product.benefits && (
+                <div className="bg-primary/[0.03] border border-primary/10 rounded-2xl p-8 space-y-4">
+                  <h3 className="font-serif font-bold text-primary flex items-center gap-3 text-lg">
+                    <Sparkles className="h-5 w-5" /> Sacred Benefits
+                  </h3>
+                  <div className="text-foreground/80 flex items-start gap-3 text-lg font-serif italic leading-relaxed">
+                    <span className="text-primary">✨</span>
+                    <span>{product.benefits}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
 
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={handleAddToCart}
-                disabled={product.stock === 0 || addingToCart}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                {addingToCart ? "Adding..." : "Add to Cart"}
-              </Button>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <span className="font-serif font-bold text-slate-700">Availability</span>
+                  <span className={`font-serif font-bold ${product.stock > 0 ? "text-emerald-600" : "text-destructive"}`}>
+                    {product.stock > 0 ? `${product.stock} Units Remaining` : "Out of stock"}
+                  </span>
+                </div>
+
+                {product.stock > 0 && (
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex items-center justify-between p-2 border rounded-xl bg-white min-w-[140px]">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        disabled={quantity <= 1}
+                        className="h-10 w-10"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="font-serif font-bold text-lg">{quantity}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          if (quantity < product.stock) {
+                            setQuantity(quantity + 1);
+                          } else {
+                            toast.error(`Only ${product.stock} items in stock`);
+                          }
+                        }}
+                        disabled={quantity >= product.stock}
+                        className="h-10 w-10"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <Button
+                      size="lg"
+                      className="flex-1 py-8 text-xl font-serif bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20"
+                      onClick={handleAddToCart}
+                      disabled={addingToCart}
+                    >
+                      <ShoppingCart className="mr-3 h-6 w-6" />
+                      {addingToCart ? "Securing..." : "Add to Cart"}
+                    </Button>
+                  </div>
+                )}
+                
+                {product.stock <= 0 && (
+                  <Button
+                    size="lg"
+                    className="w-full py-8 text-xl font-serif opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    Out of Stock
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
