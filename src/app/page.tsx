@@ -252,23 +252,23 @@ function HomeContent() {
                         </div>
                       )}
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between border-t border-primary/5 pt-4">
-                        <div className="flex flex-col">
-                          <span className="text-3xl font-serif text-primary">
-                            {formatPrice(product.originalPrice && product.originalPrice < product.price ? product.originalPrice : product.price)}
-                          </span>
-                          {product.originalPrice && (
-                            <span className="text-sm text-muted-foreground line-through decoration-primary/30">
-                              {formatPrice(product.originalPrice < product.price ? product.price : product.originalPrice)}
+                      <CardContent>
+                        <div className="flex items-center justify-between border-t border-primary/5 pt-4">
+                          <div className="flex flex-col">
+                            <span className="text-3xl font-serif text-primary">
+                              {formatPrice(product.price)}
                             </span>
-                          )}
+                            {product.originalPrice && product.originalPrice > product.price && (
+                              <span className="text-sm text-muted-foreground line-through decoration-primary/30">
+                                {formatPrice(product.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                          <span className={`text-sm font-serif italic ${product.stock > 0 ? 'text-muted-foreground' : 'text-destructive font-bold'}`}>
+                            {product.stock > 0 ? 'Limited Stock' : 'Out of Stock'}
+                          </span>
                         </div>
-                        <span className={`text-sm font-serif italic ${product.stock > 0 ? 'text-muted-foreground' : 'text-destructive font-bold'}`}>
-                          {product.stock > 0 ? 'Limited Stock' : 'Out of Stock'}
-                        </span>
-                      </div>
-                    </CardContent>
+                      </CardContent>
                     <CardFooter>
                       <Link href={`/products/${product.id}`} className="w-full">
                         <Button className="w-full bg-primary/5 hover:bg-primary text-primary hover:text-primary-foreground border border-primary/20 transition-all font-serif py-6 text-lg">
