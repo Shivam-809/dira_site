@@ -197,16 +197,23 @@ export async function PUT(request: NextRequest) {
       'pending', 
       'paid', 
       'placed', 
+      'confirmed',
       'processing', 
       'shipped', 
       'delivered', 
       'cancelled',
+      'refunded',
       'Order Packed',
       'Dispatched',
       'In Transit',
       'Out for Delivery'
     ];
-    if (!validStatuses.includes(status)) {
+    
+    // Normalize status to lowercase for standardized ones, but keep legacy as is
+    const normalizedStatus = status.toLowerCase();
+    const finalStatus = validStatuses.includes(status) ? status : (validStatuses.includes(normalizedStatus) ? normalizedStatus : status);
+
+    if (!validStatuses.includes(finalStatus)) {
       return NextResponse.json({ 
         error: `Invalid status. Received: ${status}. Must be one of: ${validStatuses.join(', ')}`, 
         code: 'INVALID_STATUS' 
@@ -227,7 +234,7 @@ export async function PUT(request: NextRequest) {
 
     const updated = await db.update(orders)
       .set({
-        status,
+        status: finalStatus,
         updatedAt: new Date().toISOString()
       })
       .where(eq(orders.id, orderIdNum))
