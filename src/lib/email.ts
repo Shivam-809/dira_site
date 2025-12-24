@@ -127,15 +127,110 @@ export async function sendVerificationEmail(email: string, token: string, url: s
   });
 }
 
-// Send session booking confirmation email
-interface SessionBookingEmailProps {
+// Send order status update email
+interface OrderStatusEmailProps {
   to: string;
   userName: string;
-  sessionType: string;
-  date: string;
-  time: string;
-  duration: number;
-  notes?: string;
+  orderId: number;
+  newStatus: string;
+  trackingLink?: string;
+}
+
+export async function sendOrderStatusUpdateEmail({
+  to,
+  userName,
+  orderId,
+  newStatus,
+  trackingLink,
+}: OrderStatusEmailProps) {
+  const statusColors: Record<string, string> = {
+    confirmed: '#0ea5e9',
+    processing: '#6366f1',
+    shipped: '#2563eb',
+    delivered: '#059669',
+    cancelled: '#dc2626',
+    refunded: '#db2777',
+  };
+
+  const color = statusColors[newStatus.toLowerCase()] || '#6b21a8';
+  const displayStatus = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Order Status Updated - Dira Tarot</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 0;">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <!-- Header -->
+                <tr>
+                  <td align="center" style="padding: 40px 40px 20px 40px; background: linear-gradient(135deg, #6b21a8 0%, #9333ea 100%);">
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-family: 'Georgia', serif;">
+                      ✨ Dira Tarot
+                    </h1>
+                  </td>
+                </tr>
+                
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px;">
+                    <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px;">Hi ${userName},</h2>
+                    <p style="margin: 0 0 25px 0; color: #666; font-size: 16px; line-height: 1.6;">
+                      Your order <strong>#${orderId}</strong> status has been updated.
+                    </p>
+
+                    <div style="background-color: ${color}10; border-left: 4px solid ${color}; padding: 20px; margin-bottom: 25px; border-radius: 4px; text-align: center;">
+                      <p style="margin: 0; font-size: 14px; color: ${color}; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Current Status</p>
+                      <p style="margin: 10px 0 0 0; font-size: 24px; color: ${color}; font-weight: bold;">${displayStatus}</p>
+                    </div>
+
+                    <p style="margin: 0 0 25px 0; color: #666; font-size: 16px; line-height: 1.6;">
+                      You can track your order's journey in real-time on our website.
+                    </p>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" style="padding: 10px 0 30px 0;">
+                          <a href="${trackingLink || 'https://diratarot.com/track-order'}" style="display: inline-block; padding: 16px 40px; background-color: #6b21a8; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                            Track Your Order
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin: 0; color: #6b21a8; font-size: 16px; font-weight: bold;">
+                      The Dira Tarot Team ✨
+                    </p>
+                  </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                  <td align="center" style="padding: 25px 40px; background-color: #f9fafb; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                    <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                      © ${new Date().getFullYear()} Dira Tarot. All rights reserved.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `✨ Order #${orderId} Update: ${displayStatus} - Dira Tarot`,
+    html,
+  });
 }
 
 export async function sendSessionBookingEmail({
