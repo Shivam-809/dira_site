@@ -41,21 +41,21 @@ export default function Footer() {
                   Home
                 </Link>
               </li>
-              <li>
-                <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link href="/track-order" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </li>
+                <li>
+                  <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Shop
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Contact
+                  </Link>
+                </li>
             </ul>
           </div>
 
