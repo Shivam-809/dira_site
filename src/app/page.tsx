@@ -81,27 +81,42 @@ function HomeContent() {
               </div>
               
               <div className="relative flex flex-col items-center">
-                <div className="relative mb-8 animate-float text-center">
-                  <h1 className="text-[28px] font-serif tracking-[1.2px] text-black font-cinzel font-[600] whitespace-nowrap">
-                    Clarity. Healing. Conscious Alignment.
+                <div className="relative mb-8 animate-float text-center space-y-4">
+                  <div className="flex justify-center mb-4">
+                    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary opacity-80">
+                      <path d="M50 20C50 20 40 40 20 45C40 50 50 70 50 70C50 70 60 50 80 45C60 40 50 20 50 20Z" fill="currentColor" />
+                      <path d="M50 30C50 30 45 45 35 50C45 55 50 65 50 65C50 65 55 55 65 50C55 45 50 30 50 30Z" fill="currentColor" opacity="0.6" />
+                    </svg>
+                  </div>
+                  <h1 className="text-4xl md:text-6xl font-serif tracking-[2px] text-black font-[600]">
+                    Heal • Re-align • Discover
                   </h1>
+                  <div className="flex justify-center mt-4">
+                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary opacity-40">
+                      <path d="M50 20C50 20 40 40 20 45C40 50 50 70 50 70C50 70 60 50 80 45C60 40 50 20 50 20Z" fill="currentColor" />
+                    </svg>
+                  </div>
                 </div>
               </div>
               
-              <p className="text-2xl md:text-3xl font-cormorant italic text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed">
-                Ethical tarot and intuitive healing for those ready to understand, heal, and realign.
+              <p className="text-2xl md:text-3xl font-serif italic text-black/80 max-w-2xl mx-auto leading-relaxed">
+                A soul-led space for self discovery
               </p>
               
               <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-                <Link href="/shop">
+                <Link href="/services">
                   <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-8 text-xl font-serif">
-                    <ShoppingCart className="mr-3 h-6 w-6" />
-                    Enter the Shop
+                    Explore Services
                   </Button>
                 </Link>
-                <Link href="/contact">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary/40 hover:bg-primary/5 px-10 py-8 text-xl font-serif">
-                    Seek Guidance
+                <Link href="/shop">
+                  <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-8 text-xl font-serif">
+                    Explore Shop
+                  </Button>
+                </Link>
+                <Link href="/courses">
+                  <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-8 text-xl font-serif">
+                    Explore Courses
                   </Button>
                 </Link>
               </div>
