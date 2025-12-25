@@ -64,25 +64,47 @@ export default function SlotManagementDialog({ serviceId, serviceName, open, onO
     setAdding(true);
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/services/slots", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          serviceId,
-          date: newDate,
-          time: newTime,
-          isAvailable: true
-        }),
-      });
+      
+      // Support for comma separated times
+      const times = newTime.split(',').map(t => t.trim()).filter(Boolean);
+      
+      let response;
+      if (times.length > 1) {
+        response = await fetch("/api/admin/services/slots", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            serviceId,
+            date: newDate,
+            slots: times.map(t => ({ time: t, isAvailable: true }))
+          }),
+        });
+      } else {
+        response = await fetch("/api/admin/services/slots", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            serviceId,
+            date: newDate,
+            time: newTime,
+            isAvailable: true
+          }),
+        });
+      }
 
       if (response.ok) {
-        toast.success("Slot added!");
+        toast.success(times.length > 1 ? `${times.length} slots added!` : "Slot added!");
+        setNewTime("10:00 AM"); // Reset time but keep date for convenience
         fetchSlots();
       } else {
-        toast.error("Failed to add slot");
+        const err = await response.json();
+        toast.error(err.error || "Failed to add slot");
       }
     } catch (error) {
       toast.error("Error adding slot");
