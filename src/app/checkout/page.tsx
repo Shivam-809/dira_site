@@ -52,6 +52,8 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       name: "",
+      email: "",
+      phone: "",
       address: "",
       city: "",
       state: "",
