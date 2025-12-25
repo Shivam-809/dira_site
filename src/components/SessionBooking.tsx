@@ -42,6 +42,7 @@ interface Service {
   category: string | null;
 }
 
+// Rebuild trigger: Fixed session types issue and database sync
 export default function SessionBooking() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
