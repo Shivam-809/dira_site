@@ -89,12 +89,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       userId,
+      serviceId,
       sessionType,
       date,
       time,
       duration,
       clientName,
       clientEmail,
+      clientPhone,
       notes,
     } = body;
 
