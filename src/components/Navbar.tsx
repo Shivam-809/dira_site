@@ -111,31 +111,32 @@ export default function Navbar() {
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-2xl md:text-3xl font-serif tracking-tight text-primary leading-none">
-                      Dira
-                    </span>
-                    <span className="text-sm md:text-base font-felipa text-primary/80 leading-tight mt-0.5">
-                      Sakalya Wellbeing
-                    </span>
-                  </div>
-                </Link>
+                    <div className="flex flex-col">
+                      <span className="text-2xl md:text-3xl font-serif tracking-tight text-primary leading-none">
+                        Dira
+                      </span>
+                    </div>
+                  </Link>
 
 
-              <div className="hidden md:flex items-center space-x-10 font-serif italic">
-                <Link href="/" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                  Home
-                </Link>
-                <Link href="/#about" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                  About Us
-                </Link>
-                <Link href="/shop" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                  Shop
-                </Link>
+                <div className="hidden md:flex items-center space-x-10 font-serif italic">
+                  <Link href="/" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    Home
+                  </Link>
+                  <Link href="/services" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    Explore Services
+                  </Link>
+                  <Link href="/shop" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    Explore Shop
+                  </Link>
+                  <Link href="/courses" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    Explore Courses
+                  </Link>
                   <Link href="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
                     Contact
                   </Link>
                 </div>
+
 
 
 
