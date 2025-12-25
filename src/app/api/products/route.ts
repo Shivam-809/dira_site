@@ -184,7 +184,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits } = body;
+    const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits, isActive } = body;
 
     // Validate price if provided
     if (price !== undefined && price !== null) {
@@ -220,6 +220,7 @@ export async function PUT(request: NextRequest) {
     if (featured !== undefined) updateData.featured = featured;
     if (originalPrice !== undefined) updateData.originalPrice = originalPrice;
     if (benefits !== undefined) updateData.benefits = benefits?.trim() || null;
+    if (isActive !== undefined) updateData.isActive = isActive;
 
     const updatedProduct = await db
       .update(products)
