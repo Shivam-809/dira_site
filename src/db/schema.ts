@@ -179,6 +179,16 @@ export const courseEnrollments = sqliteTable('course_enrollments', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const serviceSlots = sqliteTable('service_slots', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  serviceId: integer('service_id').references(() => services.id), // If null, general slot
+  date: text('date').notNull(), // YYYY-MM-DD
+  time: text('time').notNull(), // e.g., "9:00 AM"
+  isAvailable: integer('is_available', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
 export const contactMessages = sqliteTable('contact_messages', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userName: text('user_name').notNull(),
