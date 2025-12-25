@@ -253,11 +253,11 @@ export default function SessionBooking() {
 
   const availableDates = Array.from(
     new Set(availableSlots.map(slot => slot.date))
-  ).slice(0, 14);
+  ).sort().slice(0, 14);
 
   const availableTimes = formData.date
     ? availableSlots
-        .filter(slot => slot.date === formData.date && slot.available)
+        .filter(slot => slot.date === formData.date && slot.isAvailable)
         .map(slot => slot.time)
     : [];
 
