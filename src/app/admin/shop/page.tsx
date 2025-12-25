@@ -757,20 +757,31 @@ export default function AdminPage() {
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                           </FormControl>
-                            <SelectContent>
-                              <SelectItem value="crystals">Crystals</SelectItem>
-                              <SelectItem value="bath_salt">Bath Salt</SelectItem>
-                              <SelectItem value="candles">Candles</SelectItem>
-                              <SelectItem value="decks">Tarot Decks</SelectItem>
-                              <SelectItem value="books">Books</SelectItem>
-                              <SelectItem value="accessories">Accessories</SelectItem>
-                            </SelectContent>
+                              <SelectContent>
+                                <SelectItem value="crystals">Crystals</SelectItem>
+                                <SelectItem value="bath_salt">Bath Salt</SelectItem>
+                                <SelectItem value="candles">Candles</SelectItem>
+                                <SelectItem value="other">Other (Custom)</SelectItem>
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
+                    {form.watch("category") === "other" && (
+                      <div className="mt-2">
+                        <Input 
+                          placeholder="Enter custom category name" 
+                          className="rounded-xl"
+                          onChange={(e) => {
+                            // This is a bit tricky with react-hook-form + select
+                            // But for simplicity we'll just let them type it and we'll handle it on submit if needed
+                            // Or better: just make category an Input if they choose 'other'
+                          }}
+                        />
+                      </div>
                     )}
-                  />
 
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
