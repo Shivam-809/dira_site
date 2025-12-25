@@ -59,26 +59,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4 text-primary text-lg">Categories</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-                  Explore Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/courses" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-                  Explore Courses
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-                  Explore Products
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <h3 className="text-xl font-bold mb-4 mystical-text">Categories</h3>
+              <ul className="space-y-2 text-slate-400 font-medium">
+                <li><Link href="/shop" className="hover:text-primary transition-colors">Explore Shop</Link></li>
+                <li><Link href="/services" className="hover:text-primary transition-colors">Explore Services</Link></li>
+                <li><Link href="/courses" className="hover:text-primary transition-colors">Explore Courses</Link></li>
+              </ul>
+            </div>
 
           <div>
             <h3 className="font-semibold mb-4 text-primary">Support</h3>
