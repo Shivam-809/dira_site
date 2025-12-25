@@ -255,6 +255,10 @@ export default function SessionBooking() {
     new Set(availableSlots.map(slot => slot.date))
   ).sort().slice(0, 14);
 
+  const availableTimes = availableSlots
+    .filter(slot => slot.date === formData.date)
+    .map(slot => slot.time);
+
   const selectedService = services.find(s => s.id.toString() === formData.serviceId);
 
   return (
