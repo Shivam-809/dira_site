@@ -306,19 +306,62 @@ export default function AdminCoursesPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold">Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Course content and what students will learn..." className="rounded-xl min-h-[120px]" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-bold">Description</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Course content and what students will learn..." className="rounded-xl min-h-[120px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="space-y-2">
+                  <FormLabel className="font-bold">Course PDF (Optional)</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                      <Input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handlePdfUpload}
+                        className="hidden"
+                        id="pdf-upload"
+                        disabled={uploadingPdf}
+                      />
+                      <label
+                        htmlFor="pdf-upload"
+                        className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-xl cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                      >
+                        {uploadingPdf ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        ) : (
+                          <FileUp className="h-5 w-5 text-primary" />
+                        )}
+                        <span className="font-medium text-slate-600">
+                          {form.getValues("pdfUrl") ? "Change PDF" : "Upload Course PDF"}
+                        </span>
+                      </label>
+                    </div>
+                    {form.getValues("pdfUrl") && (
+                      <div className="flex items-center gap-2 p-2 bg-primary/5 rounded-lg border border-primary/20">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-bold text-primary truncate max-w-[150px]">
+                          PDF Attached
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => form.setValue("pdfUrl", "")}
+                          className="p-1 hover:bg-primary/10 rounded-full"
+                        >
+                          <X className="h-3 w-3 text-primary" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               <FormField
                 control={form.control}
                 name="isActive"
