@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { db } from './src/db';
 import { services, courses } from './src/db/schema';
 import { sql } from 'drizzle-orm';
