@@ -52,8 +52,6 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       name: "",
-      email: "",
-      phone: "",
       address: "",
       city: "",
       state: "",
@@ -143,8 +141,8 @@ export default function CheckoutPage() {
           currency: "INR",
           receipt: `receipt_${Date.now()}`,
           customerName: shippingData.name,
-          customerEmail: shippingData.email,
-          customerPhone: shippingData.phone,
+          customerEmail: session?.user?.email,
+          customerPhone: "",
         }),
       });
 
@@ -167,8 +165,8 @@ export default function CheckoutPage() {
         },
         prefill: {
           name: shippingData.name,
-          email: shippingData.email,
-          contact: shippingData.phone,
+          email: session?.user?.email || "",
+          contact: "",
         },
         theme: {
           color: "#6b21a8",
@@ -198,18 +196,7 @@ export default function CheckoutPage() {
 
   const verifyAndCompleteOrder = async (razorpayResponse: any, shippingData: CheckoutFormValues) => {
     try {
-      // Create order items data for verification
-      const orderItems = cartItems.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return {
-          productId: item.productId,
-          quantity: item.quantity,
-          price: product?.price || 0,
-          name: product?.name || "Product",
-        };
-      });
-
-      // Verify payment and save order (Atomic)
+      // Verify payment signature
       const verifyResponse = await fetch("/api/razorpay/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,33 +204,60 @@ export default function CheckoutPage() {
           razorpayOrderId: razorpayResponse.razorpay_order_id,
           razorpayPaymentId: razorpayResponse.razorpay_payment_id,
           razorpaySignature: razorpayResponse.razorpay_signature,
-          type: "order",
-          data: {
-            userId: session?.user?.id,
-            items: orderItems,
-            totalAmount: calculateTotal(),
-            shippingAddress: {
-              name: shippingData.name,
-              email: shippingData.email,
-              phone: shippingData.phone,
-              address: shippingData.address,
-              city: shippingData.city,
-              state: shippingData.state,
-              zip: shippingData.zip,
-              country: shippingData.country,
-            },
-          },
         }),
       });
 
       const verifyData = await verifyResponse.json();
 
       if (!verifyData.success) {
-        throw new Error(verifyData.message || "Payment verification failed");
+        throw new Error("Payment verification failed");
       }
 
-      toast.success("Payment successful! Order placed.");
-      router.push(`/checkout/success?paymentId=${razorpayResponse.razorpay_payment_id}`);
+      // Create order in database
+      const orderItems = cartItems.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          price: product?.price || 0,
+        };
+      });
+
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session?.user?.id,
+          items: orderItems,
+          totalAmount: calculateTotal(),
+          status: "paid",
+          paymentIntentId: razorpayResponse.razorpay_payment_id,
+          shippingAddress: {
+            name: shippingData.name,
+            address: shippingData.address,
+            city: shippingData.city,
+            state: shippingData.state,
+            zip: shippingData.zip,
+            country: shippingData.country,
+          },
+        }),
+      });
+
+        if (!orderResponse.ok) {
+          throw new Error("Failed to save order");
+        }
+
+        const savedOrder = await orderResponse.json();
+
+        // Clear cart
+        await Promise.all(
+          cartItems.map(item => 
+            fetch(`/api/cart?id=${item.id}`, { method: "DELETE" })
+          )
+        );
+
+        toast.success("Payment successful! Order placed.");
+        router.push(`/checkout/success?orderId=${savedOrder.id}`);
     } catch (error: any) {
       console.error("Order completion error:", error);
       toast.error(error.message || "Failed to complete order");
@@ -290,50 +304,19 @@ export default function CheckoutPage() {
                       <div className="space-y-4">
                         <h3 className="font-semibold text-lg">Shipping Address</h3>
                         
-                          <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Full Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Enter your full name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="email"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Email Address</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="your.email@example.com" type="email" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="phone"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Phone Number</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="+91..." {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter your full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
                         <FormField
                           control={form.control}
