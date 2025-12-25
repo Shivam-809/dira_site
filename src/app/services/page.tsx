@@ -80,23 +80,38 @@ export default function ServicesPage() {
                     <CardTitle className="text-3xl font-black">{service.heading}</CardTitle>
                     <CardDescription className="text-lg font-serif italic text-primary/70">{service.subheading}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <p className="text-slate-600 leading-relaxed font-medium">
-                      {service.description}
-                    </p>
-                    <Button className="w-full font-bold group" asChild>
-                      <Link href="/contact" className="flex items-center justify-center gap-2">
-                        Book Now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <p className="text-slate-600 leading-relaxed font-medium line-clamp-3">
+                          {service.description}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-primary/10 pt-4">
+                        <span className="text-2xl font-black text-primary">₹{service.price}</span>
+                        <Button 
+                          className="font-bold group bg-primary hover:bg-primary/90"
+                          onClick={() => handleBookNow(service)}
+                        >
+                          Book Now <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {selectedService && (
+              <BookingDialog 
+                isOpen={isBookingOpen} 
+                onOpenChange={setIsBookingOpen} 
+                service={selectedService} 
+              />
+            )}
+          </div>
+        </main>
+        <Footer />
+      </div>
+
   );
 }
