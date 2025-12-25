@@ -415,10 +415,6 @@ export default function SessionBooking() {
                 </div>
               </div>
             )}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="space-y-4">
               <Button
