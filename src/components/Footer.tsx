@@ -60,26 +60,21 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4 text-primary">Categories</h3>
+            <h3 className="font-semibold mb-4 text-primary text-lg">Categories</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/shop?category=decks" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tarot Decks
+                <Link href="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                  Explore Services
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=crystals" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Crystals
+                <Link href="/courses" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                  Explore Courses
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=books" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Books
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop?category=accessories" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Accessories
+                <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+                  Explore Products
                 </Link>
               </li>
             </ul>
