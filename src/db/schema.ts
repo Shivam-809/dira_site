@@ -88,14 +88,36 @@ export const products = sqliteTable('products', {
   description: text('description'),
   price: real('price').notNull(),
   category: text('category'),
-    imageUrl: text('image_url'),
-    stock: integer('stock').default(0),
-    featured: integer('featured', { mode: 'boolean' }).default(false),
-    originalPrice: real('original_price'),
-    benefits: text('benefits'),
-    createdAt: text('created_at').notNull(),
-    updatedAt: text('updated_at').notNull(),
-  });
+  imageUrl: text('image_url'),
+  stock: integer('stock').default(0),
+  featured: integer('featured', { mode: 'boolean' }).default(false),
+  originalPrice: real('original_price'),
+  benefits: text('benefits'),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const services = sqliteTable('services', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  heading: text('heading').notNull(),
+  subheading: text('subheading'),
+  description: text('description'),
+  category: text('category'), // Book Consultation, Book Healing, Advance Services
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const courses = sqliteTable('courses', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  heading: text('heading').notNull(),
+  subheading: text('subheading'),
+  description: text('description'),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
 
 export const cart = sqliteTable('cart', {
   id: integer('id').primaryKey({ autoIncrement: true }),
