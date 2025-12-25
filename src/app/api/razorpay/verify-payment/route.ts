@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     if (type === 'service') {
       await db.insert(serviceBookings).values({
         serviceId: data.serviceId,
+        sessionType: data.sessionType,
         clientName: data.clientName,
         clientEmail: data.clientEmail,
         clientPhone: data.clientPhone,
