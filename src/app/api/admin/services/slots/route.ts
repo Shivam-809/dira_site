@@ -36,7 +36,23 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { serviceId, date, time, isAvailable } = body;
+    const { serviceId, date, time, slots: bulkSlots, isAvailable } = body;
+
+    if (bulkSlots && Array.isArray(bulkSlots)) {
+      const insertedSlots = [];
+      for (const slot of bulkSlots) {
+        const result = await db.insert(serviceSlots).values({
+          serviceId: serviceId ? parseInt(serviceId) : null,
+          date: slot.date || date,
+          time: slot.time,
+          isAvailable: slot.isAvailable ?? isAvailable ?? true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }).returning();
+        insertedSlots.push(result[0]);
+      }
+      return NextResponse.json(insertedSlots);
+    }
 
     const newSlot = await db.insert(serviceSlots).values({
       serviceId: serviceId ? parseInt(serviceId) : null,
