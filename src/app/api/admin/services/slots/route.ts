@@ -36,24 +36,32 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log('Received slots request body:', body);
     const { serviceId, date, time, slots: bulkSlots, isAvailable } = body;
 
     if (bulkSlots && Array.isArray(bulkSlots)) {
+      console.log('Handling bulk slots:', bulkSlots);
       const insertedSlots = [];
       for (const slot of bulkSlots) {
-        const result = await db.insert(serviceSlots).values({
-          serviceId: serviceId ? parseInt(serviceId) : null,
-          date: slot.date || date,
-          time: slot.time,
-          isAvailable: slot.isAvailable ?? isAvailable ?? true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }).returning();
-        insertedSlots.push(result[0]);
+        try {
+          const result = await db.insert(serviceSlots).values({
+            serviceId: serviceId ? parseInt(serviceId) : null,
+            date: slot.date || date,
+            time: slot.time,
+            isAvailable: slot.isAvailable ?? isAvailable ?? true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }).returning();
+          insertedSlots.push(result[0]);
+        } catch (err) {
+          console.error('Error inserting individual slot:', err, slot);
+          throw err;
+        }
       }
       return NextResponse.json(insertedSlots);
     }
 
+    console.log('Handling single slot:', { serviceId, date, time, isAvailable });
     const newSlot = await db.insert(serviceSlots).values({
       serviceId: serviceId ? parseInt(serviceId) : null,
       date,
@@ -65,6 +73,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newSlot[0]);
   } catch (error: any) {
+    console.error('API Error in /api/admin/services/slots:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
