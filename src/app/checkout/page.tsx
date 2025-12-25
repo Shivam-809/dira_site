@@ -167,8 +167,8 @@ export default function CheckoutPage() {
         },
         prefill: {
           name: shippingData.name,
-          email: session?.user?.email || "",
-          contact: "",
+          email: shippingData.email,
+          contact: shippingData.phone,
         },
         theme: {
           color: "#6b21a8",
