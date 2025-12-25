@@ -322,6 +322,19 @@ export default function AdminCoursesPage() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-bold">Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" className="rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className="space-y-2">
                   <FormLabel className="font-bold">Course PDF (Optional)</FormLabel>
                   <div className="flex items-center gap-4">
