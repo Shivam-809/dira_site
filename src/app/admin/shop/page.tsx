@@ -30,6 +30,7 @@ const productSchema = z.object({
   category: z.string().min(1, "Category is required"),
   stock: z.number().int().min(0, "Stock must be non-negative"),
   featured: z.boolean(),
+  isActive: z.boolean().default(true),
   imageUrl: z.string().optional(),
   originalPrice: z.number().min(0, "Original price must be non-negative").optional().nullable(),
   benefits: z.string().optional().nullable(),
