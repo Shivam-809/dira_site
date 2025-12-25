@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Loader2, BookOpen, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, BookOpen, Search, FileUp, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,7 @@ const courseSchema = z.object({
   heading: z.string().min(2, "Heading is required"),
   subheading: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  pdfUrl: z.string().optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -29,6 +30,7 @@ interface Course {
   heading: string;
   subheading: string | null;
   description: string | null;
+  pdfUrl: string | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -42,6 +44,7 @@ export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [uploadingPdf, setUploadingPdf] = useState(false);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
@@ -49,6 +52,7 @@ export default function AdminCoursesPage() {
       heading: "",
       subheading: "",
       description: "",
+      pdfUrl: "",
       isActive: true,
     },
   });
@@ -59,7 +63,12 @@ export default function AdminCoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("/api/admin/courses");
+      const token = localStorage.getItem("admin_token");
+      const response = await fetch("/api/admin/courses", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setCourses(data);
@@ -78,6 +87,7 @@ export default function AdminCoursesPage() {
       heading: "",
       subheading: "",
       description: "",
+      pdfUrl: "",
       isActive: true,
     });
     setDialogOpen(true);
@@ -89,9 +99,43 @@ export default function AdminCoursesPage() {
       heading: course.heading,
       subheading: course.subheading || "",
       description: course.description || "",
+      pdfUrl: course.pdfUrl || "",
       isActive: course.isActive,
     });
     setDialogOpen(true);
+  };
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+
+    setUploadingPdf(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        form.setValue('pdfUrl', data.imageUrl);
+        toast.success("PDF uploaded successfully");
+      } else {
+        toast.error(data.error || "Failed to upload PDF");
+      }
+    } catch (error) {
+      toast.error("Failed to upload PDF");
+    } finally {
+      setUploadingPdf(false);
+    }
   };
 
   const onSubmit = async (data: CourseFormValues) => {
@@ -103,9 +147,13 @@ export default function AdminCoursesPage() {
       
       const method = editingCourse ? "PUT" : "POST";
 
+      const token = localStorage.getItem("admin_token");
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(data),
       });
 
@@ -127,8 +175,12 @@ export default function AdminCoursesPage() {
     if (!courseToDelete) return;
 
     try {
+      const token = localStorage.getItem("admin_token");
       const response = await fetch(`/api/admin/courses?id=${courseToDelete}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
