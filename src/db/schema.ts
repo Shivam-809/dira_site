@@ -114,6 +114,7 @@ export const courses = sqliteTable('courses', {
   heading: text('heading').notNull(),
   subheading: text('subheading'),
   description: text('description'),
+  pdfUrl: text('pdf_url'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
