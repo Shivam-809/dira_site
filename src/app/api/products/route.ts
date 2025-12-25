@@ -39,11 +39,16 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const featuredParam = searchParams.get('featured');
+    const includeInactive = searchParams.get('includeInactive') === 'true';
 
     let query = db.select().from(products);
 
     // Build WHERE conditions
     const conditions = [];
+
+    if (!includeInactive) {
+      conditions.push(eq(products.isActive, true));
+    }
 
     if (search) {
       conditions.push(
