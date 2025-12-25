@@ -45,12 +45,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { heading, subheading, description, isActive } = body;
+    const { heading, subheading, description, pdfUrl, isActive } = body;
 
     const newCourse = await db.insert(courses).values({
       heading,
       subheading,
       description,
+      pdfUrl,
       isActive: isActive ?? true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
