@@ -45,6 +45,8 @@ export default function AdminServicesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<number | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [slotDialogOpen, setSlotDialogOpen] = useState(false);
+  const [serviceForSlots, setServiceForSlots] = useState<{ id: number; heading: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
