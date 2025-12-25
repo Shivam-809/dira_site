@@ -78,13 +78,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { heading, subheading, description, isActive } = body;
+    const { heading, subheading, description, pdfUrl, isActive } = body;
 
     const updatedCourse = await db.update(courses)
       .set({
         heading,
         subheading,
         description,
+        pdfUrl,
         isActive,
         updatedAt: new Date().toISOString(),
       })
