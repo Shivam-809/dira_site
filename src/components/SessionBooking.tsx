@@ -255,12 +255,6 @@ export default function SessionBooking() {
     new Set(availableSlots.map(slot => slot.date))
   ).sort().slice(0, 14);
 
-  const availableTimes = formData.date
-    ? availableSlots
-        .filter(slot => slot.date === formData.date && slot.isAvailable)
-        .map(slot => slot.time)
-    : [];
-
   const selectedService = services.find(s => s.id.toString() === formData.serviceId);
 
   return (
@@ -417,6 +411,10 @@ export default function SessionBooking() {
                     {currency === 'USD' && (
                       <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{selectedService.price.toLocaleString()}</p>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
                   </div>
                 </div>
               </div>
