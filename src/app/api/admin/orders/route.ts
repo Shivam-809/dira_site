@@ -141,17 +141,44 @@ export async function GET(request: NextRequest) {
 
     // Fetch tracking for all results
     const parsedResults = await Promise.all(results.map(async (order) => {
-      const tracking = await db.select()
-        .from(orderTracking)
-        .where(eq(orderTracking.orderId, order.id))
-        .orderBy(desc(orderTracking.createdAt));
+      try {
+        const tracking = await db.select()
+          .from(orderTracking)
+          .where(eq(orderTracking.orderId, order.id))
+          .orderBy(desc(orderTracking.createdAt));
+
+        let items = [];
+        try {
+          items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+          if (!Array.isArray(items)) items = [];
+        } catch (e) {
+          console.error(`Failed to parse items for order ${order.id}:`, e);
+          items = [];
+        }
+
+        let shippingAddress = {};
+        try {
+          shippingAddress = typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : (order.shippingAddress || {});
+        } catch (e) {
+          console.error(`Failed to parse shippingAddress for order ${order.id}:`, e);
+          shippingAddress = {};
+        }
 
         return {
           ...order,
-          items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []),
-          shippingAddress: typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : (order.shippingAddress || {}),
+          items,
+          shippingAddress,
           tracking
         };
+      } catch (err) {
+        console.error(`Critical error processing order ${order.id}:`, err);
+        return {
+          ...order,
+          items: [],
+          shippingAddress: {},
+          tracking: []
+        };
+      }
     }));
 
     return NextResponse.json(parsedResults, { status: 200 });
