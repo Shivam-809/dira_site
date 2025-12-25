@@ -10,11 +10,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Loader2, Sparkles, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Sparkles, Search, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import SlotManagementDialog from "@/components/admin/SlotManagementDialog";
 
 const serviceSchema = z.object({
   heading: z.string().min(2, "Heading is required"),
