@@ -41,16 +41,27 @@ const menuItems = [
     href: "/admin/users", 
     icon: Users 
   },
-  { 
-    title: "Orders", 
-    href: "/admin/orders", 
-    icon: ShoppingBag 
-  },
-  { 
-    title: "Messages", 
-    href: "/admin/contact-messages", 
-    icon: MessageSquare 
-  },
+    { 
+      title: "Orders", 
+      href: "/admin/orders", 
+      icon: ShoppingBag 
+    },
+    { 
+      title: "Service Bookings", 
+      href: "/admin/bookings", 
+      icon: Sparkles 
+    },
+    { 
+      title: "Course Enrollments", 
+      href: "/admin/enrollments", 
+      icon: BookOpen 
+    },
+    { 
+      title: "Messages", 
+      href: "/admin/contact-messages", 
+      icon: MessageSquare 
+    },
+
 ];
 
 export default function AdminSidebar() {
