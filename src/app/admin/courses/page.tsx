@@ -101,6 +101,7 @@ export default function AdminCoursesPage() {
       heading: course.heading,
       subheading: course.subheading || "",
       description: course.description || "",
+      price: course.price || 0,
       pdfUrl: course.pdfUrl || "",
       isActive: course.isActive,
     });
