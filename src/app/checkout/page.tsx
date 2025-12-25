@@ -198,7 +198,18 @@ export default function CheckoutPage() {
 
   const verifyAndCompleteOrder = async (razorpayResponse: any, shippingData: CheckoutFormValues) => {
     try {
-      // Verify payment signature
+      // Create order items data for verification
+      const orderItems = cartItems.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          price: product?.price || 0,
+          name: product?.name || "Product",
+        };
+      });
+
+      // Verify payment and save order (Atomic)
       const verifyResponse = await fetch("/api/razorpay/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -206,60 +217,33 @@ export default function CheckoutPage() {
           razorpayOrderId: razorpayResponse.razorpay_order_id,
           razorpayPaymentId: razorpayResponse.razorpay_payment_id,
           razorpaySignature: razorpayResponse.razorpay_signature,
+          type: "order",
+          data: {
+            userId: session?.user?.id,
+            items: orderItems,
+            totalAmount: calculateTotal(),
+            shippingAddress: {
+              name: shippingData.name,
+              email: shippingData.email,
+              phone: shippingData.phone,
+              address: shippingData.address,
+              city: shippingData.city,
+              state: shippingData.state,
+              zip: shippingData.zip,
+              country: shippingData.country,
+            },
+          },
         }),
       });
 
       const verifyData = await verifyResponse.json();
 
       if (!verifyData.success) {
-        throw new Error("Payment verification failed");
+        throw new Error(verifyData.message || "Payment verification failed");
       }
 
-      // Create order in database
-      const orderItems = cartItems.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return {
-          productId: item.productId,
-          quantity: item.quantity,
-          price: product?.price || 0,
-        };
-      });
-
-      const orderResponse = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: session?.user?.id,
-          items: orderItems,
-          totalAmount: calculateTotal(),
-          status: "paid",
-          paymentIntentId: razorpayResponse.razorpay_payment_id,
-          shippingAddress: {
-            name: shippingData.name,
-            address: shippingData.address,
-            city: shippingData.city,
-            state: shippingData.state,
-            zip: shippingData.zip,
-            country: shippingData.country,
-          },
-        }),
-      });
-
-        if (!orderResponse.ok) {
-          throw new Error("Failed to save order");
-        }
-
-        const savedOrder = await orderResponse.json();
-
-        // Clear cart
-        await Promise.all(
-          cartItems.map(item => 
-            fetch(`/api/cart?id=${item.id}`, { method: "DELETE" })
-          )
-        );
-
-        toast.success("Payment successful! Order placed.");
-        router.push(`/checkout/success?orderId=${savedOrder.id}`);
+      toast.success("Payment successful! Order placed.");
+      router.push(`/checkout/success?paymentId=${razorpayResponse.razorpay_payment_id}`);
     } catch (error: any) {
       console.error("Order completion error:", error);
       toast.error(error.message || "Failed to complete order");
