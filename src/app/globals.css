@@ -153,11 +153,10 @@
     @apply bg-background text-foreground;
     font-family: "Times New Roman", Times, serif;
     font-weight: 400;
+    color: #000000 !important;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "Times New Roman", Times, serif;
-    font-weight: 600;
-    color: var(--foreground);
+  h1, h2, h3, h4, h5, h6, p, span, div, a, li, label, input, textarea {
+    color: #000000 !important;
   }
   
   .mystical-text {
