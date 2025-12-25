@@ -110,19 +110,19 @@
 :root {
   --radius: 0.625rem;
   --background: #F5F5DC;
-  --foreground: #2C1810;
+  --foreground: #000000;
   --card: #FDF5E6;
-  --card-foreground: #2C1810;
+  --card-foreground: #000000;
   --popover: #FDF5E6;
-  --popover-foreground: #2C1810;
+  --popover-foreground: #000000;
   --primary: #B8860B;
   --primary-foreground: #F5F5DC;
   --secondary: #EADDCA;
-  --secondary-foreground: #2C1810;
+  --secondary-foreground: #000000;
   --muted: #E8D3B9;
-  --muted-foreground: #704214;
+  --muted-foreground: #000000;
   --accent: #F2D2BD;
-  --accent-foreground: #2C1810;
+  --accent-foreground: #000000;
   --destructive: #8b0000;
   --border: rgba(184, 134, 11, 0.2);
   --input: rgba(184, 134, 11, 0.1);
