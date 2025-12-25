@@ -315,9 +315,22 @@ export default function AdminServicesPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="isActive"
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-bold">Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" className="rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isActive"
                 render={({ field }) => (
                   <FormItem className="flex items-center space-x-2 space-y-0 p-4 bg-slate-50 border rounded-xl">
                     <FormControl>
