@@ -61,20 +61,25 @@ export default function AdminServicesPage() {
     fetchServices();
   }, []);
 
-  const fetchServices = async () => {
-    try {
-      const response = await fetch("/api/admin/services");
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data);
+    const fetchServices = async () => {
+      try {
+        const token = localStorage.getItem("admin_token");
+        const response = await fetch("/api/admin/services", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+        toast.error("Failed to load services");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch services:", error);
-      toast.error("Failed to load services");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const handleAddService = () => {
     setEditingService(null);
