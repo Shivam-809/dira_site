@@ -5,15 +5,17 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import BookingDialog from "@/components/BookingDialog";
 
 interface Service {
   id: number;
   heading: string;
   subheading: string | null;
   description: string | null;
+  price: number;
   category: string | null;
   isActive: boolean;
 }
@@ -21,6 +23,8 @@ interface Service {
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -39,6 +43,11 @@ export default function ServicesPage() {
 
     fetchServices();
   }, []);
+
+  const handleBookNow = (service: Service) => {
+    setSelectedService(service);
+    setIsBookingOpen(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F5DC]">
