@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { heading, subheading, description, category, isActive } = body;
+    const { heading, subheading, description, category, price, isActive } = body;
 
     const updatedService = await db.update(services)
       .set({
@@ -87,6 +87,7 @@ export async function PUT(request: NextRequest) {
         subheading,
         description,
         category,
+        price: parseFloat(String(price || 0)),
         isActive,
         updatedAt: new Date().toISOString(),
       })
