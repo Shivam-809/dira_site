@@ -231,17 +231,24 @@ export default function AdminServicesPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-slate-500 text-sm line-clamp-3">{service.description}</p>
-                <div className="flex gap-2 pt-2 border-t">
-                  <Button variant="outline" size="sm" className="flex-1 rounded-xl font-bold" onClick={() => handleEditService(service)}>
-                    <Edit className="h-4 w-4 mr-2" /> Edit
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white rounded-xl font-bold" onClick={() => {
-                    setServiceToDelete(service.id);
-                    setDeleteDialogOpen(true);
-                  }}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                  <div className="flex gap-2 pt-2 border-t">
+                    <Button variant="outline" size="sm" className="flex-1 rounded-xl font-bold" onClick={() => {
+                      setServiceForSlots({ id: service.id, heading: service.heading });
+                      setSlotDialogOpen(true);
+                    }}>
+                      <Calendar className="h-4 w-4 mr-2" /> Slots
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 rounded-xl font-bold" onClick={() => handleEditService(service)}>
+                      <Edit className="h-4 w-4 mr-2" /> Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white rounded-xl font-bold" onClick={() => {
+                      setServiceToDelete(service.id);
+                      setDeleteDialogOpen(true);
+                    }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
               </CardContent>
             </Card>
           ))}
