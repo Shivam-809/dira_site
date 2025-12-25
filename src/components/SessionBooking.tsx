@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Clock, Sparkles, CheckCircle2, CreditCard, Globe } from "lucide-react";
+import { Calendar, Clock, Sparkles, CheckCircle2, CreditCard, Globe, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,6 @@ interface Service {
   category: string | null;
 }
 
-// Rebuild trigger: Fixed session types issue and database sync
 export default function SessionBooking() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -50,6 +49,7 @@ export default function SessionBooking() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  
   const [formData, setFormData] = useState({
     serviceId: "",
     sessionType: "",
@@ -59,6 +59,7 @@ export default function SessionBooking() {
     price: 0,
     clientName: "",
     clientEmail: "",
+    clientPhone: "",
     notes: "",
   });
 
@@ -107,26 +108,12 @@ export default function SessionBooking() {
         ...prev,
         serviceId: id,
         sessionType: service.heading,
-        duration: 60, // Default duration
+        duration: 60,
         price: service.price,
-        date: "", // Reset date/time when service changes
+        date: "",
         time: "",
       }));
     }
-  };
-
-  const initializeRazorpay = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
   };
 
   const handlePayment = async () => {
@@ -136,7 +123,7 @@ export default function SessionBooking() {
       return;
     }
 
-    if (!formData.sessionType || !formData.date || !formData.time) {
+    if (!formData.serviceId || !formData.date || !formData.time || !formData.clientName || !formData.clientEmail || !formData.clientPhone) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -144,22 +131,16 @@ export default function SessionBooking() {
     setLoading(true);
 
     try {
-      const res = await initializeRazorpay();
-      if (!res) {
-        toast.error("Razorpay SDK failed to load");
-        setLoading(false);
-        return;
-      }
-
+      // 1. Create Razorpay Order
       const orderResponse = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: formData.price,
-          currency: "INR",
-          receipt: `session_${Date.now()}`,
           customerName: formData.clientName,
           customerEmail: formData.clientEmail,
+          customerPhone: formData.clientPhone,
+          receipt: `session_${Date.now()}`,
         }),
       });
 
@@ -169,15 +150,17 @@ export default function SessionBooking() {
         throw new Error(orderData.error || "Failed to create order");
       }
 
+      // 2. Configure Razorpay
       const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "Dira",
-        description: `${formData.sessionType} - ${formData.duration} min`,
+        name: "Dira Sakalya Wellbeing",
+        description: `${formData.sessionType}`,
         order_id: orderData.orderId,
         handler: async function (response: any) {
           try {
+            // 3. Verify Payment and Save Booking (Atomic)
             const verifyResponse = await fetch("/api/razorpay/verify-payment", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -185,43 +168,29 @@ export default function SessionBooking() {
                 razorpayOrderId: response.razorpay_order_id,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
+                type: "service",
+                data: {
+                  serviceId: parseInt(formData.serviceId),
+                  sessionType: formData.sessionType,
+                  clientName: formData.clientName,
+                  clientEmail: formData.clientEmail,
+                  clientPhone: formData.clientPhone,
+                  date: formData.date,
+                  timeSlot: formData.time,
+                  notes: formData.notes,
+                  amount: formData.price,
+                },
               }),
             });
 
             const verifyData = await verifyResponse.json();
 
             if (verifyData.success) {
-              const token = localStorage.getItem("bearer_token");
-              const sessionResponse = await fetch("/api/sessions", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  ...(token && { Authorization: `Bearer ${token}` }),
-                },
-                body: JSON.stringify({
-                  userId: session.user.id,
-                  sessionType: formData.sessionType,
-                  date: formData.date,
-                  time: formData.time,
-                  duration: formData.duration,
-                  clientName: formData.clientName,
-                  clientEmail: formData.clientEmail,
-                  notes: formData.notes || null,
-                  paymentId: response.razorpay_payment_id,
-                  paymentStatus: "paid",
-                  amount: formData.price,
-                }),
-              });
-
-                if (sessionResponse.ok) {
-                  const savedSession = await sessionResponse.json();
-                  toast.success("Payment successful! Session booked.");
-                  router.push(`/sessions/success?sessionId=${savedSession.id}`);
-                } else {
-                toast.error("Payment successful but session booking failed. Please contact support.");
-              }
+              toast.success("Payment successful! Session booked.");
+              setBookingSuccess(true);
+              router.push(`/sessions/success?paymentId=${response.razorpay_payment_id}&service=${encodeURIComponent(formData.sessionType)}&date=${formData.date}&time=${formData.time}`);
             } else {
-              toast.error("Payment verification failed");
+              toast.error(verifyData.message || "Payment verification failed");
             }
           } catch (error) {
             console.error("Verification error:", error);
@@ -231,6 +200,7 @@ export default function SessionBooking() {
         prefill: {
           name: formData.clientName,
           email: formData.clientEmail,
+          contact: formData.clientPhone,
         },
         theme: {
           color: "#d4af37",
@@ -242,12 +212,11 @@ export default function SessionBooking() {
         },
       };
 
-      const paymentObject = new window.Razorpay(options);
+      const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
     } catch (error: any) {
       console.error("Payment error:", error);
       toast.error(error.message || "Payment failed");
-    } finally {
       setLoading(false);
     }
   };
@@ -263,63 +232,62 @@ export default function SessionBooking() {
   const selectedService = services.find(s => s.id.toString() === formData.serviceId);
 
   return (
-    <Card className="w-full bg-card/50 border-primary/20 gold-border">
+    <Card className="w-full bg-card/50 border-primary/20 gold-border shadow-2xl">
       <CardHeader className="border-b border-primary/10">
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
-            <div>
-              <CardTitle className="text-3xl font-bebas tracking-wide text-primary">Book a Session</CardTitle>
-              <CardDescription className="text-muted-foreground font-serif italic text-base">
-                Schedule a personalized reading with our experienced practitioners
-              </CardDescription>
-            </div>
-
+          <div>
+            <CardTitle className="text-3xl font-bebas tracking-wide text-primary uppercase">Book a Session</CardTitle>
+            <CardDescription className="text-muted-foreground font-serif italic text-base">
+              Schedule your mystical guidance and healing journey
+            </CardDescription>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-6">
         {bookingSuccess ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="h-20 w-20 rounded-full bg-green-900/30 border border-green-600/30 flex items-center justify-center">
-              <CheckCircle2 className="h-10 w-10 text-green-500" />
+            <div className="h-20 w-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <CheckCircle2 className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-center text-primary">Booking Confirmed!</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Your session has been booked and paid successfully. We'll send a confirmation email shortly.
+            <h3 className="text-2xl font-serif text-center text-primary italic">Session Confirmed!</h3>
+            <p className="text-muted-foreground text-center max-w-md font-serif italic">
+              Your divine appointment has been scheduled. Check your email for details.
             </p>
-            <Button onClick={() => setBookingSuccess(false)} variant="outline" className="border-primary/30 hover:bg-primary/10">
+            <Button onClick={() => setBookingSuccess(false)} variant="outline" className="border-primary/30 hover:bg-primary/10 font-serif italic">
               Book Another Session
             </Button>
           </div>
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handlePayment(); }} className="space-y-6 font-serif">
             <div className="space-y-2">
-              <Label htmlFor="sessionType" className="text-foreground text-lg">Sacred Service *</Label>
+              <Label htmlFor="sessionType" className="text-foreground text-lg">Select Sacred Service *</Label>
               <Select
                 value={formData.serviceId}
                 onValueChange={handleServiceChange}
                 required
               >
-                <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50">
+                <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg">
                   <SelectValue placeholder="Choose a session type" />
                 </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/20">
-                    {services.map((service) => (
-                      <SelectItem key={service.id} value={service.id.toString()}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{service.heading} - {formatPrice(service.price)}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {service.subheading}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                <SelectContent className="bg-card border-primary/20">
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={service.id.toString()}>
+                      <div className="flex flex-col text-left">
+                        <span className="font-medium text-lg">{service.heading} — {formatPrice(service.price)}</span>
+                        <span className="text-xs text-muted-foreground italic">
+                          {service.subheading}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="date" className="text-foreground text-lg">Choose Date *</Label>
                 <Select
@@ -327,15 +295,15 @@ export default function SessionBooking() {
                   onValueChange={(value) => setFormData(prev => ({ ...prev, date: value, time: "" }))}
                   required
                 >
-                  <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50 font-serif">
-                    <Calendar className="mr-2 h-4 w-4 text-primary" />
+                  <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg">
+                    <Calendar className="mr-2 h-5 w-5 text-primary" />
                     <SelectValue placeholder="Select date" />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/20 font-serif">
+                  <SelectContent className="bg-card border-primary/20">
                     {availableDates.map((date) => (
                       <SelectItem key={date} value={date}>
                         {new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-                          weekday: 'short',
+                          weekday: 'long',
                           month: 'short',
                           day: 'numeric',
                         })}
@@ -353,11 +321,11 @@ export default function SessionBooking() {
                   disabled={!formData.date}
                   required
                 >
-                  <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50 font-serif">
-                    <Clock className="mr-2 h-4 w-4 text-primary" />
+                  <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg">
+                    <Clock className="mr-2 h-5 w-5 text-primary" />
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/20 font-serif">
+                  <SelectContent className="bg-card border-primary/20">
                     {availableTimes.map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
@@ -368,31 +336,43 @@ export default function SessionBooking() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="clientName" className="text-foreground text-lg">Your Name *</Label>
                 <Input
                   id="clientName"
                   value={formData.clientName}
                   onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
-                  placeholder="Enter your name"
+                  placeholder="Enter your full name"
                   required
-                  className="bg-background/50 border-primary/20 focus:border-primary/50 font-serif"
+                  className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="clientEmail" className="text-foreground text-lg">Email *</Label>
+                <Label htmlFor="clientPhone" className="text-foreground text-lg">Phone Number *</Label>
                 <Input
-                  id="clientEmail"
-                  type="email"
-                  value={formData.clientEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                  placeholder="your.email@example.com"
+                  id="clientPhone"
+                  value={formData.clientPhone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                  placeholder="+91..."
                   required
-                  className="bg-background/50 border-primary/20 focus:border-primary/50 font-serif"
+                  className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="clientEmail" className="text-foreground text-lg">Email Address *</Label>
+              <Input
+                id="clientEmail"
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                placeholder="your.email@example.com"
+                required
+                className="bg-background/50 border-primary/20 focus:border-primary/50 py-6 text-lg"
+              />
             </div>
 
             <div className="space-y-2">
@@ -401,63 +381,60 @@ export default function SessionBooking() {
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Share any specific questions or areas you'd like to focus on..."
+                placeholder="Share any specific questions or areas you'd like to focus on during your session..."
                 rows={4}
-                className="bg-background/50 border-primary/20 focus:border-primary/50 font-serif"
+                className="bg-background/50 border-primary/20 focus:border-primary/50 text-lg"
               />
             </div>
 
             {selectedService && (
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground italic">Session Exchange</span>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{formatPrice(selectedService.price)}</p>
-                    {currency === 'USD' && (
-                      <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{selectedService.price.toLocaleString()}</p>
-                    )}
-                  </div>
+              <div className="p-6 rounded-xl bg-primary/5 border border-primary/10 flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest">Energy Exchange</p>
+                  <p className="text-3xl font-bebas text-primary tracking-wider">{formatPrice(selectedService.price)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground italic">Approx. {formData.duration} Minutes</p>
+                  {currency === 'USD' && (
+                    <p className="text-[10px] text-muted-foreground">Processed as ₹{selectedService.price.toLocaleString()}</p>
+                  )}
                 </div>
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-2xl tracking-widest py-8 h-auto shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bebas text-3xl tracking-[0.2em] py-10 h-auto shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] group"
                 disabled={loading || isPending}
               >
                 {loading ? (
-                  <span className="animate-pulse">Invoking Gateway...</span>
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span>Processing...</span>
+                  </div>
                 ) : (
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center">
-                      <CreditCard className="mr-2 h-6 w-6" />
-                      <span>Pay & Book Session</span>
-                    </div>
-                    {selectedService && (
-                      <span className="text-xs font-serif italic mt-1 opacity-80">
-                        Total: {currency === 'USD' ? `${formatPrice(selectedService.price)} (₹${selectedService.price})` : formatPrice(selectedService.price)}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-8 w-8 group-hover:rotate-12 transition-transform" />
+                    <span>Proceed to Booking</span>
                   </div>
                 )}
               </Button>
 
               {currency === 'USD' && (
-                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg text-xs text-primary font-serif italic">
-                  <Globe className="h-4 w-4 shrink-0" />
-                  <p>International payment will be processed in INR (Indian Rupees).</p>
+                <div className="flex items-center gap-2 p-4 bg-primary/5 border border-primary/20 rounded-xl text-xs text-primary italic">
+                  <Globe className="h-5 w-5 shrink-0" />
+                  <p>International exchange will be processed in Indian Rupees (INR) at current market rates.</p>
                 </div>
               )}
             </div>
 
-            {!session?.user && (
-              <p className="text-sm text-muted-foreground text-center">
-                You need to be logged in to book a session.{" "}
-                <a href="/login" className="text-primary hover:underline">
-                  Login here
+            {!session?.user && !isPending && (
+              <p className="text-sm text-muted-foreground text-center font-serif italic">
+                A portal account is required for bookings.{" "}
+                <a href="/login" className="text-primary hover:underline font-bold">
+                  Login or Sign Up
                 </a>
               </p>
             )}
