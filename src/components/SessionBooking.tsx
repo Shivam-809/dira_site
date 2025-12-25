@@ -298,26 +298,25 @@ export default function SessionBooking() {
             <div className="space-y-2">
               <Label htmlFor="sessionType" className="text-foreground text-lg">Sacred Service *</Label>
               <Select
-                value={formData.sessionType}
-                onValueChange={handleSessionTypeChange}
+                value={formData.serviceId}
+                onValueChange={handleServiceChange}
                 required
               >
                 <SelectTrigger className="bg-background/50 border-primary/20 focus:border-primary/50">
                   <SelectValue placeholder="Choose a session type" />
                 </SelectTrigger>
                   <SelectContent className="bg-card border-primary/20">
-                    {SESSION_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
+                    {services.map((service) => (
+                      <SelectItem key={service.id} value={service.id.toString()}>
                         <div className="flex flex-col">
-                          <span className="font-medium">{type.label} - {formatPrice(type.price)}</span>
+                          <span className="font-medium">{service.heading} - {formatPrice(service.price)}</span>
                           <span className="text-xs text-muted-foreground">
-                            {type.description} • {type.duration} min
+                            {service.subheading}
                           </span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
-
               </Select>
             </div>
 
