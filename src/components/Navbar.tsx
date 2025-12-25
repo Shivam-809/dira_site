@@ -123,14 +123,11 @@ export default function Navbar() {
                   <Link href="/" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
                     Home
                   </Link>
-                  <Link href="/services" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                    Explore Services
+                  <Link href="/#about" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    About Us
                   </Link>
                   <Link href="/shop" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                    Explore Shop
-                  </Link>
-                  <Link href="/courses" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
-                    Explore Courses
+                    Shop
                   </Link>
                   <Link href="/contact" className="text-base font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
                     Contact
