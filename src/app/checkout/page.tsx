@@ -143,8 +143,8 @@ export default function CheckoutPage() {
           currency: "INR",
           receipt: `receipt_${Date.now()}`,
           customerName: shippingData.name,
-          customerEmail: session?.user?.email,
-          customerPhone: "",
+          customerEmail: shippingData.email,
+          customerPhone: shippingData.phone,
         }),
       });
 
