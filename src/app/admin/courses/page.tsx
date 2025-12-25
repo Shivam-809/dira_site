@@ -19,6 +19,7 @@ const courseSchema = z.object({
   heading: z.string().min(2, "Heading is required"),
   subheading: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.coerce.number().min(0, "Price must be at least 0"),
   pdfUrl: z.string().optional(),
   isActive: z.boolean().default(true),
 });
