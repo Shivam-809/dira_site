@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, ArrowRight, Loader2, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import EnrollmentDialog from "@/components/EnrollmentDialog";
 
 interface Course {
   id: number;
   heading: string;
   subheading: string | null;
   description: string | null;
+  price: number;
   pdfUrl: string | null;
   isActive: boolean;
 }
@@ -21,6 +23,8 @@ interface Course {
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -39,6 +43,11 @@ export default function CoursesPage() {
 
     fetchCourses();
   }, []);
+
+  const handleEnrollNow = (course: Course) => {
+    setSelectedCourse(course);
+    setIsEnrollmentOpen(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F5DC]">
