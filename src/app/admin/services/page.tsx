@@ -370,9 +370,17 @@ export default function AdminServicesPage() {
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteService} className="bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-white">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <SlotManagementDialog 
+          open={slotDialogOpen} 
+          onOpenChange={setSlotDialogOpen}
+          serviceId={serviceForSlots?.id || null}
+          serviceName={serviceForSlots?.heading || ""}
+        />
+      </div>
+    );
+  }
+
