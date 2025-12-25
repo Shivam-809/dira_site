@@ -261,7 +261,7 @@ export default function SessionBooking() {
         .map(slot => slot.time)
     : [];
 
-  const selectedSessionType = SESSION_TYPES.find(st => st.value === formData.sessionType);
+  const selectedService = services.find(s => s.id.toString() === formData.serviceId);
 
   return (
     <Card className="w-full bg-card/50 border-primary/20 gold-border">
