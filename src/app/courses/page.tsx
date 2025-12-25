@@ -77,32 +77,45 @@ export default function CoursesPage() {
                     <CardTitle className="text-3xl font-black text-slate-900">{course.heading}</CardTitle>
                     <CardDescription className="text-lg font-serif italic text-primary/70">{course.subheading}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <p className="text-slate-600 leading-relaxed font-medium line-clamp-4">
-                      {course.description}
-                    </p>
-                    <div className="flex flex-col gap-3">
-                      {course.pdfUrl && (
-                        <Button variant="outline" className="w-full font-bold border-primary/20 hover:bg-primary/5 text-primary" asChild>
-                          <a href={course.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                            <FileText className="h-4 w-4" /> View Curriculum
-                          </a>
-                        </Button>
-                      )}
-                      <Button className="w-full font-bold group" asChild>
-                        <Link href="/contact" className="flex items-center justify-center gap-2">
-                          Enroll Now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
+                    <CardContent className="space-y-6">
+                      <p className="text-slate-600 leading-relaxed font-medium line-clamp-4">
+                        {course.description}
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {course.pdfUrl && (
+                          <Button variant="outline" className="w-full font-bold border-primary/20 hover:bg-primary/5 text-primary" asChild>
+                            <a href={course.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                              <FileText className="h-4 w-4" /> View Curriculum
+                            </a>
+                          </Button>
+                        )}
+                        <div className="flex items-center justify-between border-t border-primary/10 pt-4 mt-2">
+                          <span className="text-2xl font-black text-primary">₹{course.price}</span>
+                          <Button 
+                            className="font-bold group bg-primary hover:bg-primary/90"
+                            onClick={() => handleEnrollNow(course)}
+                          >
+                            Enroll Now <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {selectedCourse && (
+              <EnrollmentDialog 
+                isOpen={isEnrollmentOpen} 
+                onOpenChange={setIsEnrollmentOpen} 
+                course={selectedCourse} 
+              />
+            )}
+          </div>
+        </main>
+        <Footer />
+      </div>
+
   );
 }
