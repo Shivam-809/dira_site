@@ -21,6 +21,7 @@ const serviceSchema = z.object({
   subheading: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Category is required"),
+  price: z.coerce.number().min(0, "Price must be at least 0"),
   isActive: z.boolean().default(true),
 });
 
