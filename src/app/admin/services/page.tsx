@@ -102,6 +102,7 @@ export default function AdminServicesPage() {
       subheading: service.subheading || "",
       description: service.description || "",
       category: service.category || "Book Consultation",
+      price: service.price || 0,
       isActive: service.isActive,
     });
     setDialogOpen(true);
