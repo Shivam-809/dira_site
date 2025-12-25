@@ -89,11 +89,10 @@ export async function GET(request: NextRequest) {
 
   export async function POST(request: NextRequest) {
     try {
-      const body = await request.json();
-      const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits } = body;
-  
-      // Validate required fields
-
+    const body = await request.json();
+    const { name, description, price, category, imageUrl, stock, featured, originalPrice, benefits, isActive } = body;
+    
+    // Validate required fields
     if (!name) {
       return NextResponse.json(
         { error: 'Name is required', code: 'MISSING_REQUIRED_FIELDS' },
@@ -138,6 +137,7 @@ export async function GET(request: NextRequest) {
       featured: featured !== undefined && featured !== null ? featured : false,
       originalPrice: originalPrice !== undefined && originalPrice !== null ? originalPrice : null,
       benefits: benefits?.trim() || null,
+      isActive: isActive !== undefined && isActive !== null ? isActive : true,
       createdAt: now,
       updatedAt: now,
     };
