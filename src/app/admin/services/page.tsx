@@ -142,8 +142,12 @@ export default function AdminServicesPage() {
     if (!serviceToDelete) return;
 
     try {
+      const token = localStorage.getItem("admin_token");
       const response = await fetch(`/api/admin/services?id=${serviceToDelete}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
