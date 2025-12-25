@@ -88,6 +88,7 @@ export default function AdminCoursesPage() {
       heading: "",
       subheading: "",
       description: "",
+      price: 0,
       pdfUrl: "",
       isActive: true,
     });
