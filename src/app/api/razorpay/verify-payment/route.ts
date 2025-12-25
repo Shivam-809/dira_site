@@ -67,46 +67,30 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-    } else if (type === 'order') {
-      // Create order
-      const newOrder = await db.insert(orders).values({
-        userId: data.userId,
-        items: JSON.stringify(data.items),
-        totalAmount: data.totalAmount,
-        status: 'paid',
-        paymentIntentId: razorpayPaymentId,
-        shippingAddress: JSON.stringify(data.shippingAddress),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }).returning();
 
-      // Clear user's cart
-      await db.delete(cart).where(eq(cart.userId, data.userId));
-
-      // Send order confirmation email
+      // Send confirmation email
       try {
         await sendEmail({
-          to: data.shippingAddress.email || data.clientEmail,
-          subject: '🛍️ Order Confirmed - Dira',
+          to: data.clientEmail,
+          subject: '✨ Booking Confirmed - Dira',
           html: `
             <div style="font-family: serif; padding: 20px; color: #1a1a1a;">
-              <h1 style="color: #6b21a8;">Order Confirmed!</h1>
-              <p>Hi ${data.shippingAddress.name},</p>
-              <p>Thank you for your purchase from Dira. Your order <strong>#${newOrder[0].id}</strong> has been received and is being processed.</p>
+              <h1 style="color: #6b21a8;">Booking Confirmed!</h1>
+              <p>Hi ${data.clientName},</p>
+              <p>Your booking for <strong>${data.serviceName}</strong> has been confirmed.</p>
               <div style="background: #fdf6e3; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Total Amount:</strong> ₹${data.totalAmount}</p>
+                <p><strong>Date:</strong> ${data.date}</p>
+                <p><strong>Time:</strong> ${data.timeSlot}</p>
                 <p><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
               </div>
-              <p>We'll notify you once your treasures are on their way!</p>
+              <p>We look forward to seeing you!</p>
               <p>Best regards,<br/>Dira Team</p>
             </div>
           `
         });
       } catch (emailError) {
-        console.error('Failed to send order email:', emailError);
+        console.error('Failed to send confirmation email:', emailError);
       }
-    }
-
 
     } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
