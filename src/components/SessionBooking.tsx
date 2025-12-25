@@ -408,14 +408,14 @@ export default function SessionBooking() {
               />
             </div>
 
-            {selectedSessionType && (
+            {selectedService && (
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground italic">Session Exchange</span>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{formatPrice(selectedSessionType.price)}</p>
+                    <p className="text-2xl font-bold text-primary">{formatPrice(selectedService.price)}</p>
                     {currency === 'USD' && (
-                      <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{selectedSessionType.price.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground font-normal">≈ ₹{selectedService.price.toLocaleString()}</p>
                     )}
                   </div>
                 </div>
@@ -437,9 +437,9 @@ export default function SessionBooking() {
                       <CreditCard className="mr-2 h-6 w-6" />
                       <span>Pay & Book Session</span>
                     </div>
-                    {selectedSessionType && (
+                    {selectedService && (
                       <span className="text-xs font-serif italic mt-1 opacity-80">
-                        Total: {currency === 'USD' ? `${formatPrice(selectedSessionType.price)} (₹${selectedSessionType.price})` : formatPrice(selectedSessionType.price)}
+                        Total: {currency === 'USD' ? `${formatPrice(selectedService.price)} (₹${selectedService.price})` : formatPrice(selectedService.price)}
                       </span>
                     )}
                   </div>
