@@ -163,6 +163,8 @@ export const serviceBookings = sqliteTable('service_bookings', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const sessionBookings = serviceBookings; // Alias for backward compatibility
+
 export const courseEnrollments = sqliteTable('course_enrollments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').references(() => user.id),
