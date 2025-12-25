@@ -26,25 +26,31 @@ declare global {
 }
 
 interface AvailableSlot {
+  id: number;
   date: string;
   time: string;
   available: boolean;
+  serviceId: number | null;
 }
 
-const SESSION_TYPES = [
-  { value: "Tarot Reading", label: "Tarot Reading", duration: 60, price: 1500, description: "Insightful card readings for guidance" },
-  { value: "Chakra Alignment", label: "Chakra Alignment", duration: 90, price: 2000, description: "Energy balancing and healing" },
-  { value: "Astrology Consultation", label: "Astrology Consultation", duration: 60, price: 1800, description: "Cosmic insights and birth chart analysis" },
-  { value: "Past Life Reading", label: "Past Life Reading", duration: 90, price: 2500, description: "Explore your soul's journey" },
-];
+interface Service {
+  id: number;
+  heading: string;
+  subheading: string | null;
+  description: string | null;
+  price: number;
+  category: string | null;
+}
 
 export default function SessionBooking() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [formData, setFormData] = useState({
+    serviceId: "",
     sessionType: "",
     date: "",
     time: "",
@@ -58,39 +64,54 @@ export default function SessionBooking() {
   const { formatPrice, currency } = useCurrency();
 
   useEffect(() => {
-    fetchAvailableSlots();
+    fetchServices();
   }, []);
 
   useEffect(() => {
-    if (session?.user) {
-      setFormData(prev => ({
-        ...prev,
-        clientName: session.user.name || "",
-        clientEmail: session.user.email || "",
-      }));
+    if (formData.serviceId) {
+      fetchAvailableSlots(formData.serviceId);
+    } else {
+      setAvailableSlots([]);
     }
-  }, [session]);
+  }, [formData.serviceId]);
 
-  const fetchAvailableSlots = async () => {
+  const fetchServices = async () => {
     try {
-      const response = await fetch("/api/sessions/available");
+      const response = await fetch("/api/services");
       if (response.ok) {
         const data = await response.json();
-        setAvailableSlots(data.slice(0, 42));
+        setServices(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch services:", error);
+    }
+  };
+
+  const fetchAvailableSlots = async (serviceId: string) => {
+    try {
+      const response = await fetch(`/api/sessions/available?serviceId=${serviceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableSlots(data);
       }
     } catch (error) {
       console.error("Failed to fetch available slots:", error);
     }
   };
 
-  const handleSessionTypeChange = (value: string) => {
-    const sessionType = SESSION_TYPES.find(st => st.value === value);
-    setFormData(prev => ({
-      ...prev,
-      sessionType: value,
-      duration: sessionType?.duration || 60,
-      price: sessionType?.price || 0,
-    }));
+  const handleServiceChange = (id: string) => {
+    const service = services.find(s => s.id.toString() === id);
+    if (service) {
+      setFormData(prev => ({
+        ...prev,
+        serviceId: id,
+        sessionType: service.heading,
+        duration: 60, // Default duration
+        price: service.price,
+        date: "", // Reset date/time when service changes
+        time: "",
+      }));
+    }
   };
 
   const initializeRazorpay = () => {
