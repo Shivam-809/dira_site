@@ -103,6 +103,7 @@ export const services = sqliteTable('services', {
   heading: text('heading').notNull(),
   subheading: text('subheading'),
   description: text('description'),
+  price: real('price').notNull().default(0),
   category: text('category'), // Book Consultation, Book Healing, Advance Services
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
   createdAt: text('created_at').notNull(),
@@ -114,6 +115,7 @@ export const courses = sqliteTable('courses', {
   heading: text('heading').notNull(),
   subheading: text('subheading'),
   description: text('description'),
+  price: real('price').notNull().default(0),
   pdfUrl: text('pdf_url'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
   createdAt: text('created_at').notNull(),
@@ -143,17 +145,36 @@ export const orders = sqliteTable('orders', {
   updatedAt: text('updated_at').notNull(),
 });
 
-export const sessionBookings = sqliteTable('session_bookings', {
+export const serviceBookings = sqliteTable('service_bookings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull().references(() => user.id),
-  sessionType: text('session_type').notNull(),
-  date: text('date').notNull(),
-  time: text('time').notNull(),
-  duration: integer('duration').notNull(),
-  status: text('status').notNull().default('pending'),
+  userId: text('user_id').references(() => user.id),
+  serviceId: integer('service_id').notNull().references(() => services.id),
   clientName: text('client_name').notNull(),
   clientEmail: text('client_email').notNull(),
+  clientPhone: text('client_phone').notNull(),
+  date: text('date').notNull(),
+  timeSlot: text('time_slot').notNull(),
   notes: text('notes'),
+  status: text('status').notNull().default('pending'),
+  paymentId: text('payment_id'),
+  razorpayOrderId: text('razorpay_order_id'),
+  amount: real('amount'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const courseEnrollments = sqliteTable('course_enrollments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').references(() => user.id),
+  courseId: integer('course_id').notNull().references(() => courses.id),
+  clientName: text('client_name').notNull(),
+  clientEmail: text('client_email').notNull(),
+  clientPhone: text('client_phone').notNull(),
+  deliveryType: text('delivery_type').notNull(), // 'one-to-one' | 'recorded'
+  status: text('status').notNull().default('pending'),
+  paymentId: text('payment_id'),
+  razorpayOrderId: text('razorpay_order_id'),
+  amount: real('amount'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
