@@ -149,6 +149,7 @@ export const serviceBookings = sqliteTable('service_bookings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').references(() => user.id),
   serviceId: integer('service_id').notNull().references(() => services.id),
+  sessionType: text('session_type'), // Descriptive name of the service/session
   clientName: text('client_name').notNull(),
   clientEmail: text('client_email').notNull(),
   clientPhone: text('client_phone').notNull(),
