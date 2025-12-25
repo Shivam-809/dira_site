@@ -45,12 +45,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { heading, subheading, description, pdfUrl, isActive } = body;
+    const { heading, subheading, description, price, pdfUrl, isActive } = body;
 
     const newCourse = await db.insert(courses).values({
       heading,
       subheading,
       description,
+      price: parseFloat(String(price || 0)),
       pdfUrl,
       isActive: isActive ?? true,
       createdAt: new Date().toISOString(),
