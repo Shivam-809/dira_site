@@ -133,7 +133,7 @@ function HomeContent() {
               <h2 className="text-4xl md:text-5xl font-serif italic text-primary">Welcome.</h2>
               <div className="space-y-6 text-xl md:text-2xl font-serif leading-relaxed text-foreground/80">
                 <p>
-                  I’m Dr. Diksha Malhotra, PT — a Twin Flame Coach, Tarot Card Reader, Reiki Grandmaster, and Angel Healer.
+                  I’m Dr. Diksha Malhotra PT — a Twin Flame Coach, Tarot Card Reader, Reiki Grandmaster, and Angel Healer.
                 </p>
                 <p>
                   For over 6 years, I’ve supported individuals across the world through emotionally intense phases of life — especially those navigating the Twin Flame journey. My work focuses on bringing clarity where there is confusion, stability where there is emotional overwhelm, and healing where patterns keep repeating.
