@@ -89,6 +89,7 @@ export default function AdminServicesPage() {
       subheading: "",
       description: "",
       category: "Book Consultation",
+      price: 0,
       isActive: true,
     });
     setDialogOpen(true);
