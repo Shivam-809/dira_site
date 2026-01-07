@@ -4,7 +4,6 @@ import { db } from '@/db';
 import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
 import { eq } from 'drizzle-orm';
-import { createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +69,7 @@ export async function POST(request: NextRequest) {
       });
     } else if (type === 'order') {
       // Create order
-      const newOrders = await db.insert(orders).values({
+      const newOrder = await db.insert(orders).values({
         userId: data.userId,
         items: JSON.stringify(data.items),
         totalAmount: data.totalAmount,
@@ -80,54 +79,6 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }).returning();
-
-      const newOrder = newOrders[0];
-
-      // Shiprocket Integration
-      try {
-        const shiprocketOrderData = {
-          order_id: newOrder.id.toString(),
-          order_date: new Date().toISOString().split('T')[0],
-          pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
-          billing_customer_name: data.shippingAddress.name,
-          billing_last_name: '',
-          billing_address: data.shippingAddress.address,
-          billing_city: data.shippingAddress.city,
-          billing_pincode: data.shippingAddress.zip,
-          billing_state: data.shippingAddress.state,
-          billing_country: data.shippingAddress.country || 'India',
-          billing_email: data.shippingAddress.email,
-          billing_phone: data.shippingAddress.phone,
-          shipping_is_billing: true,
-          order_items: data.items.map((item: any) => ({
-            name: item.name,
-            sku: `PROD-${item.productId}`,
-            units: item.quantity,
-            selling_price: item.price,
-            discount: 0,
-            tax: 0,
-            hsn: 0,
-          })),
-          payment_method: 'Prepaid',
-          sub_total: data.totalAmount,
-          length: 10,
-          breadth: 10,
-          height: 10,
-          weight: 0.5,
-        };
-
-        const shiprocketResult = await createShiprocketOrder(shiprocketOrderData);
-
-        if (shiprocketResult) {
-          await db.update(orders).set({
-            trackingId: shiprocketResult.awb_code,
-            courierName: shiprocketResult.courier_name,
-            updatedAt: new Date().toISOString(),
-          }).where(eq(orders.id, newOrder.id));
-        }
-      } catch (shiprocketError) {
-        console.error('Shiprocket order creation failed:', shiprocketError);
-      }
 
       // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
@@ -154,55 +105,58 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-      } else if (type === 'course') {
-        await db.insert(courseEnrollments).values({
-          courseId: data.courseId,
-          clientName: data.clientName,
-          clientEmail: data.clientEmail,
-          clientPhone: data.clientPhone,
-          deliveryType: data.deliveryType,
-          status: 'paid',
-          paymentId: razorpayPaymentId,
-          razorpayOrderId: razorpayOrderId,
-          amount: data.amount,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+    }
 
-        // Send confirmation email
-        try {
-          await sendEmail({
-            to: data.clientEmail,
-            subject: '✨ Course Enrollment Confirmed - Dira',
-            html: `
-              <div style="font-family: serif; padding: 20px; color: #1a1a1a;">
-                <h1 style="color: #6b21a8;">Enrollment Confirmed!</h1>
-                <p>Hi ${data.clientName},</p>
-                <p>You have successfully enrolled in <strong>${data.courseName}</strong>.</p>
-                <div style="background: #fdf6e3; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                  <p><strong>Delivery Type:</strong> ${data.deliveryType === 'one-to-one' ? 'One-to-One Live Session' : 'Recorded Content'}</p>
-                  <p><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
-                </div>
-                <p>You can now access your course content.</p>
-                <p>Best regards,<br/>Dira Team</p>
+
+    } else if (type === 'course') {
+      await db.insert(courseEnrollments).values({
+        courseId: data.courseId,
+        clientName: data.clientName,
+        clientEmail: data.clientEmail,
+        clientPhone: data.clientPhone,
+        deliveryType: data.deliveryType,
+        status: 'paid',
+        paymentId: razorpayPaymentId,
+        razorpayOrderId: razorpayOrderId,
+        amount: data.amount,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Send confirmation email
+      try {
+        await sendEmail({
+          to: data.clientEmail,
+          subject: '✨ Course Enrollment Confirmed - Dira',
+          html: `
+            <div style="font-family: serif; padding: 20px; color: #1a1a1a;">
+              <h1 style="color: #6b21a8;">Enrollment Confirmed!</h1>
+              <p>Hi ${data.clientName},</p>
+              <p>You have successfully enrolled in <strong>${data.courseName}</strong>.</p>
+              <div style="background: #fdf6e3; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Delivery Type:</strong> ${data.deliveryType === 'one-to-one' ? 'One-to-One Live Session' : 'Recorded Content'}</p>
+                <p><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
               </div>
-            `
-          });
-        } catch (emailError) {
-          console.error('Failed to send enrollment email:', emailError);
-        }
+              <p>You can now access your course content.</p>
+              <p>Best regards,<br/>Dira Team</p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error('Failed to send enrollment email:', emailError);
       }
+    }
 
-      return NextResponse.json(
-        {
-          success: true,
-          message: 'Payment verified and data saved successfully',
-          paymentId: razorpayPaymentId,
-          orderId: razorpayOrderId,
-        },
-        { status: 200 }
-      );
-    } catch (error) {
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Payment verified and data saved successfully',
+        paymentId: razorpayPaymentId,
+        orderId: razorpayOrderId,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
     console.error('❌ Payment verification error:', error);
     return NextResponse.json(
       { success: false, message: 'Verification failed' },

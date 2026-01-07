@@ -1,85 +1,80 @@
-const SHIPROCKET_API_BASE = 'https://apidocs.shiprocket.in/v1/external';
 
-async function getShiprocketToken() {
-  const email = process.env.SHIPROCKET_EMAIL;
-  const password = process.env.SHIPROCKET_PASSWORD;
+import axios from 'axios';
 
-  if (!email || !password || email === 'your_shiprocket_email_here') {
-    console.error('Shiprocket credentials not configured');
-    return null;
+const SHIPROCKET_EMAIL = process.env.SHIPROCKET_EMAIL;
+const SHIPROCKET_PASSWORD = process.env.SHIPROCKET_PASSWORD;
+const BASE_URL = 'https://apiv2.shiprocket.in/v1/external';
+
+let authToken: string | null = null;
+let tokenExpiry: number | null = null;
+
+export async function getShiprocketToken() {
+  if (authToken && tokenExpiry && Date.now() < tokenExpiry) {
+    return authToken;
   }
 
   try {
-    const response = await fetch(`${SHIPROCKET_API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
+    const response = await axios.post(`${BASE_URL}/auth/login`, {
+      email: SHIPROCKET_EMAIL,
+      password: SHIPROCKET_PASSWORD,
     });
 
-    const data = await response.json();
-    if (data.token) {
-      return data.token;
+    if (response.data.token) {
+      authToken = response.data.token;
+      // Token usually expires in 10 days, let's set it for 9 days to be safe
+      tokenExpiry = Date.now() + 9 * 24 * 60 * 60 * 1000;
+      return authToken;
     }
-    console.error('Failed to get Shiprocket token:', data);
-    return null;
-  } catch (error) {
-    console.error('Error authenticating with Shiprocket:', error);
-    return null;
+    throw new Error('Failed to get Shiprocket token');
+  } catch (error: any) {
+    console.error('Shiprocket Auth Error:', error.response?.data || error.message);
+    throw error;
   }
 }
 
 export async function createShiprocketOrder(orderData: any) {
   const token = await getShiprocketToken();
-  if (!token) return null;
-
   try {
-    // 1. Create Order
-    const orderPayload = {
-      ...orderData,
-      pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
-    };
-
-    const orderResponse = await fetch(`${SHIPROCKET_API_BASE}/orders/create/adhoc`, {
-      method: 'POST',
+    const response = await axios.post(`${BASE_URL}/orders/create/adhoc`, orderData, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(orderPayload),
     });
+    return response.data;
+  } catch (error: any) {
+    console.error('Shiprocket Create Order Error:', error.response?.data || error.message);
+    throw error;
+  }
+}
 
-    const orderResult = await orderResponse.json();
-    console.log('Shiprocket Order Creation Result:', orderResult);
+export async function generateAWB(shipmentId: number) {
+  const token = await getShiprocketToken();
+  try {
+    const response = await axios.post(`${BASE_URL}/courier/assign/awb`, {
+      shipment_id: shipmentId,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Shiprocket Generate AWB Error:', error.response?.data || error.message);
+    throw error;
+  }
+}
 
-    if (orderResult.order_id && orderResult.shipment_id) {
-      // 2. Generate AWB
-      const awbResponse = await fetch(`${SHIPROCKET_API_BASE}/courier/assign/awb`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          shipment_id: orderResult.shipment_id,
-        }),
-      });
-
-      const awbResult = await awbResponse.json();
-      console.log('Shiprocket AWB Generation Result:', awbResult);
-
-      return {
-        shiprocket_order_id: orderResult.order_id,
-        shipment_id: orderResult.shipment_id,
-        awb_code: awbResult.response?.data?.awb_code || null,
-        courier_name: awbResult.response?.data?.courier_name || null,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error creating Shiprocket order:', error);
-    return null;
+export async function getTrackingData(awbCode: string) {
+  const token = await getShiprocketToken();
+  try {
+    const response = await axios.get(`${BASE_URL}/courier/track/awb/${awbCode}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Shiprocket Tracking Error:', error.response?.data || error.message);
+    throw error;
   }
 }
