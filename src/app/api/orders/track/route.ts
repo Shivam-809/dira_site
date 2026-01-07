@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { orders, orderTracking } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { trackShipment } from '@/lib/shiprocket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,16 +24,10 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const result = await db.select({
-      id: orders.id,
-      status: orders.status,
-      totalAmount: orders.totalAmount,
-      updatedAt: orders.updatedAt,
-      createdAt: orders.createdAt,
-    })
-    .from(orders)
-    .where(eq(orders.id, orderIdNum))
-    .limit(1);
+    const result = await db.select()
+      .from(orders)
+      .where(eq(orders.id, orderIdNum))
+      .limit(1);
 
     if (result.length === 0) {
       return NextResponse.json({ 
@@ -42,8 +37,19 @@ export async function GET(request: NextRequest) {
     }
 
     const order = result[0];
+    let liveTracking = null;
 
-    // Fetch detailed tracking logs
+    // Fetch live tracking from Shiprocket if AWB exists
+    if (order.awbCode) {
+      try {
+        const srTracking = await trackShipment(order.awbCode);
+        liveTracking = srTracking.tracking_data;
+      } catch (srError) {
+        console.error('Shiprocket live tracking failed:', srError);
+      }
+    }
+
+    // Fetch detailed tracking logs from our DB
     const trackingLogs = await db.select()
       .from(orderTracking)
       .where(eq(orderTracking.orderId, order.id))
@@ -55,7 +61,11 @@ export async function GET(request: NextRequest) {
       amount: order.totalAmount,
       lastUpdated: order.updatedAt,
       placedAt: order.createdAt,
-      tracking: trackingLogs
+      courierName: order.courierName,
+      awbCode: order.awbCode,
+      trackingUrl: order.trackingUrl,
+      tracking: trackingLogs,
+      liveTracking: liveTracking
     }, { status: 200 });
 
   } catch (error) {
