@@ -2,40 +2,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { orders, orderTracking } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const payload = await request.json();
-    console.log("Received Shiprocket Webhook:", JSON.stringify(payload, null, 2));
+    const body = await req.json();
+    console.log("Received Shiprocket Webhook:", JSON.stringify(body, null, 2));
 
-    const { 
-      awb, 
-      courier_name, 
-      current_status, 
-      order_id, // Our internal order ID (passed as string by Shiprocket)
-      shipment_status,
+    const {
+      order_id,
+      awb,
+      current_status,
+      current_timestamp,
+      courier_name,
       scans
-    } = payload;
-
-    if (!order_id && !awb) {
-      return NextResponse.json({ message: "Missing order_id or awb" }, { status: 400 });
-    }
+    } = body;
 
     let order;
-    const numericOrderId = parseInt(order_id);
 
-    // ✅ FIX: Check if order_id is a valid number before querying
-    if (!isNaN(numericOrderId)) {
+    // Fix for NaN error: check if order_id is a numeric string or number
+    const numericOrderId = order_id && !isNaN(parseInt(order_id)) ? parseInt(order_id) : null;
+
+    if (numericOrderId) {
       order = await db.query.orders.findFirst({
         where: eq(orders.id, numericOrderId),
       });
     }
 
-    // If not found by ID, try searching by AWB if available
     if (!order && awb) {
       order = await db.query.orders.findFirst({
-        where: eq(orders.trackingId, awb),
+        where: eq(orders.trackingId, awb.toString()),
       });
     }
 
@@ -44,31 +40,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // Update order status and tracking info
-    const status = current_status || shipment_status;
-    
+    // Update order status if it's not already cancelled or delivered (or as per business logic)
     await db.update(orders)
       .set({
-        status: status.toLowerCase(),
+        status: current_status,
         courierName: courier_name || order.courierName,
-        trackingId: awb || order.trackingId,
+        trackingId: awb?.toString() || order.trackingId,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(orders.id, order.id));
 
-    // Log tracking event
+    // Log tracking update
+    const latestScan = scans && scans.length > 0 ? scans[scans.length - 1] : null;
+    
     await db.insert(orderTracking).values({
       orderId: order.id,
-      status: status,
-      description: scans?.[0]?.activity || `Status updated to ${status}`,
-      location: scans?.[0]?.location || "Transit",
-      createdAt: new Date().toISOString(),
+      status: current_status,
+      description: latestScan?.activity || `Status updated to ${current_status}`,
+      location: latestScan?.location || "In Transit",
+      createdAt: current_timestamp || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Webhook processed successfully" }, { status: 200 });
   } catch (error) {
     console.error("Webhook error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
