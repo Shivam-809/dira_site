@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { db } from '@/db';
 import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
-import { shippingService } from '@/lib/shipping';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
@@ -81,25 +80,10 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       }).returning();
 
-        // Clear user's cart
-        await db.delete(cart).where(eq(cart.userId, data.userId));
+      // Clear user's cart
+      await db.delete(cart).where(eq(cart.userId, data.userId));
 
-        // Trigger shipping
-        try {
-          await shippingService.createShipment({
-            orderId: newOrder[0].id,
-            customerName: data.shippingAddress.name,
-            address: `${data.shippingAddress.address}, ${data.shippingAddress.city}, ${data.shippingAddress.state} - ${data.shippingAddress.pincode}`,
-            phone: data.shippingAddress.phone,
-            email: data.shippingAddress.email || data.clientEmail,
-            items: data.items
-          });
-          console.log(`📦 Shipping triggered for order #${newOrder[0].id}`);
-        } catch (shippingError) {
-          console.error('Failed to trigger shipping:', shippingError);
-        }
-
-        // Send order confirmation email
+      // Send order confirmation email
       try {
         await sendEmail({
           to: data.shippingAddress.email || data.clientEmail,
