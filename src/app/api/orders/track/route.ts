@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { orders, orderTracking } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
 import { getShippingTracking } from '@/lib/shipping';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await db.select()
-    .from(orders)
-    .where(eq(orders.id, orderIdNum))
-    .limit(1);
+      .from(orders)
+      .where(eq(orders.id, orderIdNum))
+      .limit(1);
 
     if (result.length === 0) {
       return NextResponse.json({ 
@@ -37,22 +37,18 @@ export async function GET(request: NextRequest) {
     }
 
     const order = result[0];
-    let liveTracking = null;
 
-    // If we have an AWB code, try to fetch live tracking from shipping provider
-    if (order.awbCode) {
-      try {
-        liveTracking = await getShippingTracking(order.awbCode);
-      } catch (trackError) {
-        console.error('Failed to fetch live tracking:', trackError);
-      }
-    }
-
-    // Fetch local tracking logs
+    // Fetch detailed tracking logs from internal DB
     const trackingLogs = await db.select()
       .from(orderTracking)
       .where(eq(orderTracking.orderId, order.id))
       .orderBy(desc(orderTracking.createdAt));
+
+    // Try to fetch live tracking if shipment ID is available
+    let liveTracking = null;
+    if (order.shippingShipmentId) {
+      liveTracking = await getShippingTracking(order.shippingShipmentId);
+    }
 
     return NextResponse.json({
       orderId: order.id,
@@ -60,10 +56,9 @@ export async function GET(request: NextRequest) {
       amount: order.totalAmount,
       lastUpdated: order.updatedAt,
       placedAt: order.createdAt,
-      awbCode: order.awbCode,
-      courier: order.courierName,
+      awb: order.awbCode,
       trackingUrl: order.trackingUrl,
-      tracking: trackingLogs,
+      internalTracking: trackingLogs,
       liveTracking: liveTracking
     }, { status: 200 });
 

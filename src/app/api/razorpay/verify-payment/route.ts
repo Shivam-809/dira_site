@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { db } from '@/db';
-import { serviceBookings, courseEnrollments, orders, cart, orderTracking } from '@/db/schema';
+import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
 import { createShippingOrder } from '@/lib/shipping';
 import { eq } from 'drizzle-orm';
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
       razorpayOrderId, 
       razorpayPaymentId, 
       razorpaySignature,
-      type, // 'service' or 'course' or 'order'
-      data // booking or enrollment or order data
+      type, // 'service' or 'course'
+      data // booking or enrollment data
     } = body;
 
     if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
@@ -68,87 +68,26 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      } else if (type === 'order') {
-        // Create order in DB
-        const [newOrder] = await db.insert(orders).values({
-          userId: data.userId,
-          items: JSON.stringify(data.items),
-          totalAmount: data.totalAmount,
-          status: 'paid',
-          paymentIntentId: razorpayPaymentId,
-          shippingAddress: JSON.stringify(data.shippingAddress),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+    } else if (type === 'order') {
+      // Create order
+      const newOrder = await db.insert(orders).values({
+        userId: data.userId,
+        items: JSON.stringify(data.items),
+        totalAmount: data.totalAmount,
+        status: 'paid',
+        paymentIntentId: razorpayPaymentId,
+        shippingAddress: JSON.stringify(data.shippingAddress),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         }).returning();
-
-        // Add initial tracking log
-        await db.insert(orderTracking).values({
-          orderId: newOrder.id,
-          status: 'Paid',
-          description: 'Payment verified. Order is being processed.',
-          location: 'System',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-
-        // Trigger Shipping Order Creation (Async but we'll wait for the ID)
-        try {
-          const shippingItems = data.items.map((item: any) => ({
-            name: item.name,
-            sku: `PROD-${item.productId}`,
-            units: item.quantity,
-            sell_price: item.price,
-          }));
-
-          const shippingPayload = {
-            order_id: newOrder.id.toString(),
-            order_date: new Date().toISOString().split('T')[0],
-            pickup_location: "Primary",
-            billing_customer_name: data.shippingAddress.name.split(' ')[0],
-            billing_last_name: data.shippingAddress.name.split(' ').slice(1).join(' ') || 'Customer',
-            billing_address: data.shippingAddress.address || data.shippingAddress.street,
-            billing_city: data.shippingAddress.city,
-            billing_pincode: data.shippingAddress.zip || data.shippingAddress.zipCode,
-            billing_state: data.shippingAddress.state,
-            billing_country: data.shippingAddress.country,
-            billing_email: data.shippingAddress.email || data.clientEmail,
-            billing_phone: data.shippingAddress.phone || data.clientPhone,
-            shipping_is_billing: true,
-            order_items: shippingItems,
-            payment_method: "Prepaid",
-            sub_total: data.totalAmount,
-            length: 10,
-            breadth: 10,
-            height: 10,
-            weight: 0.5,
-          };
-
-          const shiprocketResponse = await createShippingOrder(shippingPayload);
-          
-          if (shiprocketResponse.order_id) {
-            await db.update(orders).set({
-              shippingOrderId: shiprocketResponse.order_id.toString(),
-              shippingShipmentId: shiprocketResponse.shipment_id?.toString(),
-              status: 'placed',
-              updatedAt: new Date().toISOString(),
-            }).where(eq(orders.id, newOrder.id));
-
-            await db.insert(orderTracking).values({
-              orderId: newOrder.id,
-              status: 'Placed',
-              description: `Order placed with shipping provider. Shipment ID: ${shiprocketResponse.shipment_id}`,
-              location: 'Shiprocket Hub',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-          }
-        } catch (shipError) {
-          console.error('Failed to create shipping order:', shipError);
+  
+        // Create shipping order
+        if (newOrder[0]) {
+          await createShippingOrder(newOrder[0].id);
         }
-
+  
         // Clear user's cart
-        await db.delete(cart).where(eq(cart.userId, data.userId));
-
+      await db.delete(cart).where(eq(cart.userId, data.userId));
 
       // Send order confirmation email
       try {
@@ -172,10 +111,7 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-    }
-
-
-    } else if (type === 'course') {
+      } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
         courseId: data.courseId,
         clientName: data.clientName,
