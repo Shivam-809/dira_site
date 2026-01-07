@@ -142,6 +142,8 @@ export const orders = sqliteTable('orders', {
   shippingOrderId: text('shipping_order_id'),
   shippingShipmentId: text('shipping_shipment_id'),
   awbCode: text('awb_code'),
+  courierName: text('courier_name'),
+  trackingId: text('tracking_id'),
   trackingUrl: text('tracking_url'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

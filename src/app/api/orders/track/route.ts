@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { orders, orderTracking } from '@/db/schema';
-import { getShippingTracking } from '@/lib/shipping';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -24,10 +23,16 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const result = await db.select()
-      .from(orders)
-      .where(eq(orders.id, orderIdNum))
-      .limit(1);
+    const result = await db.select({
+      id: orders.id,
+      status: orders.status,
+      totalAmount: orders.totalAmount,
+      updatedAt: orders.updatedAt,
+      createdAt: orders.createdAt,
+    })
+    .from(orders)
+    .where(eq(orders.id, orderIdNum))
+    .limit(1);
 
     if (result.length === 0) {
       return NextResponse.json({ 
@@ -38,17 +43,11 @@ export async function GET(request: NextRequest) {
 
     const order = result[0];
 
-    // Fetch detailed tracking logs from internal DB
+    // Fetch detailed tracking logs
     const trackingLogs = await db.select()
       .from(orderTracking)
       .where(eq(orderTracking.orderId, order.id))
       .orderBy(desc(orderTracking.createdAt));
-
-    // Try to fetch live tracking if shipment ID is available
-    let liveTracking = null;
-    if (order.shippingShipmentId) {
-      liveTracking = await getShippingTracking(order.shippingShipmentId);
-    }
 
     return NextResponse.json({
       orderId: order.id,
@@ -56,10 +55,7 @@ export async function GET(request: NextRequest) {
       amount: order.totalAmount,
       lastUpdated: order.updatedAt,
       placedAt: order.createdAt,
-      awb: order.awbCode,
-      trackingUrl: order.trackingUrl,
-      internalTracking: trackingLogs,
-      liveTracking: liveTracking
+      tracking: trackingLogs
     }, { status: 200 });
 
   } catch (error) {

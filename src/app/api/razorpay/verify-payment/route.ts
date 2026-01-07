@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { db } from '@/db';
 import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
-import { createShippingOrder } from '@/lib/shipping';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
@@ -79,14 +78,9 @@ export async function POST(request: NextRequest) {
         shippingAddress: JSON.stringify(data.shippingAddress),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        }).returning();
-  
-        // Create shipping order
-        if (newOrder[0]) {
-          await createShippingOrder(newOrder[0].id);
-        }
-  
-        // Clear user's cart
+      }).returning();
+
+      // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
 
       // Send order confirmation email
@@ -111,7 +105,10 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-      } else if (type === 'course') {
+    }
+
+
+    } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
         courseId: data.courseId,
         clientName: data.clientName,
