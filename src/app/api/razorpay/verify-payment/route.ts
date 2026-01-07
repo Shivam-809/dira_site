@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
 import { eq } from 'drizzle-orm';
+import { createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +13,8 @@ export async function POST(request: NextRequest) {
       razorpayOrderId, 
       razorpayPaymentId, 
       razorpaySignature,
-      type, // 'service' or 'course'
-      data // booking or enrollment data
+      type, // 'service', 'course', or 'order'
+      data // booking, enrollment, or order data
     } = body;
 
     if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       });
     } else if (type === 'order') {
       // Create order
-      const newOrder = await db.insert(orders).values({
+      const newOrderResults = await db.insert(orders).values({
         userId: data.userId,
         items: JSON.stringify(data.items),
         totalAmount: data.totalAmount,
@@ -80,8 +81,18 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       }).returning();
 
+      const newOrder = newOrderResults[0];
+
       // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
+
+      // 🚀 Sync with Shiprocket
+      try {
+        console.log('🚀 Syncing order with Shiprocket:', newOrder.id);
+        await createShiprocketOrder(newOrder.id);
+      } catch (shiprocketError) {
+        console.error('❌ Shiprocket sync failed:', shiprocketError);
+      }
 
       // Send order confirmation email
       try {
@@ -92,7 +103,7 @@ export async function POST(request: NextRequest) {
             <div style="font-family: serif; padding: 20px; color: #1a1a1a;">
               <h1 style="color: #6b21a8;">Order Confirmed!</h1>
               <p>Hi ${data.shippingAddress.name},</p>
-              <p>Thank you for your purchase from Dira. Your order <strong>#${newOrder[0].id}</strong> has been received and is being processed.</p>
+              <p>Thank you for your purchase from Dira. Your order <strong>#${newOrder.id}</strong> has been received and is being processed.</p>
               <div style="background: #fdf6e3; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <p><strong>Total Amount:</strong> ₹${data.totalAmount}</p>
                 <p><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
@@ -105,9 +116,6 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-    }
-
-
     } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
         courseId: data.courseId,
