@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { db } from '@/db';
-import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
+import { serviceBookings, courseEnrollments, orders, cart, orderTracking } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
 import { eq } from 'drizzle-orm';
+import { createShiprocketOrder, generateAWB } from '@/lib/shiprocket';
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,6 +83,76 @@ export async function POST(request: NextRequest) {
 
       // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
+
+      // Integrate Shiprocket
+      try {
+        const orderId = newOrder[0].id;
+        const shipping = data.shippingAddress;
+        
+        const shiprocketOrderData = {
+          order_id: orderId.toString(),
+          order_date: new Date().toISOString(),
+          pickup_location: "Primary", // This should match a pickup location in Shiprocket
+          billing_customer_name: shipping.name,
+          billing_last_name: "",
+          billing_address: shipping.address,
+          billing_address_2: shipping.apartment || "",
+          billing_city: shipping.city,
+          billing_pincode: shipping.pincode,
+          billing_state: shipping.state,
+          billing_country: "India",
+          billing_email: shipping.email || data.clientEmail || "",
+          billing_phone: shipping.phone,
+          shipping_is_billing: true,
+          order_items: data.items.map((item: any) => ({
+            name: item.name,
+            sku: item.id.toString(),
+            units: item.quantity,
+            selling_price: item.price.toString(),
+          })),
+          payment_method: "Prepaid",
+          shipping_charges: 0,
+          giftwrap_charges: 0,
+          transaction_charges: 0,
+          total_discount: 0,
+          sub_total: data.totalAmount,
+          length: 10, // Default dimensions
+          width: 10,
+          height: 10,
+          weight: 0.5,
+        };
+
+        const shiprocketResponse = await createShiprocketOrder(shiprocketOrderData);
+        console.log('✅ Shiprocket order created:', shiprocketResponse.order_id);
+
+        if (shiprocketResponse.shipment_id) {
+          const awbResponse = await generateAWB(shiprocketResponse.shipment_id);
+          console.log('✅ Shiprocket AWB generated:', awbResponse);
+          
+          if (awbResponse && awbResponse.response && awbResponse.response.data && awbResponse.response.data.awb_code) {
+            await db.update(orders)
+              .set({ 
+                trackingId: awbResponse.response.data.awb_code,
+                courierName: awbResponse.response.data.courier_name,
+                updatedAt: new Date().toISOString()
+              })
+              .where(eq(orders.id, orderId));
+            
+            // Initial tracking entry
+            await db.insert(orderTracking).values({
+              orderId: orderId,
+              status: 'Processing',
+              description: 'Order confirmed and being prepared for shipment.',
+              location: 'Warehouse',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+          }
+        }
+      } catch (shiprocketError) {
+        console.error('❌ Shiprocket Integration Error:', shiprocketError);
+        // We don't fail the whole request because payment was successful
+      }
 
       // Send order confirmation email
       try {
