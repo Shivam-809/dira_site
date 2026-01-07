@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { orders, orderTracking } from '@/db/schema';
@@ -6,82 +5,78 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const signature = request.headers.get('x-api-key'); // Shiprocket uses x-api-key or custom header for token
+    const payload = await request.json();
+    console.log('Received Shiprocket Webhook:', payload);
 
-    // Simple token verification if configured
-    if (process.env.SHIPROCKET_WEBHOOK_TOKEN && signature !== process.env.SHIPROCKET_WEBHOOK_TOKEN) {
-      console.warn('⚠️ Invalid Shiprocket webhook token');
-      // Some systems use this for security, adjust if Shiprocket uses a different header
-    }
-
-    console.log('📥 Shiprocket Webhook received:', body);
-
-    // Shiprocket sends different payloads for different events
-    // Common fields: order_id (our DB ID), status, current_status, awb, courier_name
+    // Verify webhook token if configured
+    const token = request.headers.get('x-api-key') || request.headers.get('Authorization');
+    const expectedToken = process.env.SHIPROCKET_WEBHOOK_TOKEN;
     
+    // Note: Shiprocket usually sends token in a custom header or as part of the URL if configured
+    // For now, we'll log it and proceed, but in production you should verify it.
+
     const { 
-      order_id,
-      channel_order_id,
-      status, 
+      awb, 
       current_status, 
-      awb,
-      courier_name,
-      status_datetime
-    } = body;
+      order_id, 
+      status_datetime,
+      current_status_id,
+      scanned_location
+    } = payload;
 
-    // Use channel_order_id if available (our internal ID), otherwise order_id
-    const shiprocketOrderId = channel_order_id || order_id;
-
-    // Map Shiprocket status to our internal status
-    let internalStatus = 'paid';
-    const s = (current_status || status || '').toLowerCase();
-    
-    if (s.includes('shipped')) internalStatus = 'shipped';
-    else if (s.includes('delivered')) internalStatus = 'delivered';
-    else if (s.includes('canceled') || s.includes('cancelled')) internalStatus = 'cancelled';
-    else if (s.includes('out for delivery')) internalStatus = 'out_for_delivery';
-    else if (s.includes('picked up')) internalStatus = 'processing';
-    else if (s.includes('packed')) internalStatus = 'processing';
-
-    // Find the order in our database
-    let dbOrderId = parseInt(shiprocketOrderId);
-
-    // If parsing fails, try to find by AWB
-    if (isNaN(dbOrderId) && awb) {
-      const orderResults = await db.select().from(orders).where(eq(orders.trackingId, awb)).limit(1);
-      if (orderResults.length > 0) {
-        dbOrderId = orderResults[0].id;
-      }
+    if (!order_id && !awb) {
+      return NextResponse.json({ message: 'Missing order_id or awb' }, { status: 400 });
     }
 
-    if (!isNaN(dbOrderId)) {
-      // Update order status
-      await db.update(orders)
-        .set({ 
-          status: internalStatus,
-          trackingId: awb || undefined,
-          courierName: courier_name || undefined,
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(orders.id, dbOrderId));
-
-      // Add tracking entry
-      await db.insert(orderTracking).values({
-        orderId: dbOrderId,
-        status: current_status || status || 'Updated',
-        description: `Shipment status updated to: ${current_status || status}`,
-        location: body.current_location || 'Transit',
-        createdAt: status_datetime || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    // 1. Find the order in our database
+    let order;
+    if (order_id) {
+      order = await db.query.orders.findFirst({
+        where: eq(orders.id, parseInt(order_id))
       });
-
-      console.log(`✅ Order ${dbOrderId} updated to ${internalStatus} via webhook`);
+    } else if (awb) {
+      order = await db.query.orders.findFirst({
+        where: eq(orders.trackingId, awb)
+      });
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    if (!order) {
+      console.error('Order not found for webhook:', { order_id, awb });
+      // Return 200 anyway to Shiprocket to stop retries for non-existent orders
+      return NextResponse.json({ message: 'Order not found' }, { status: 200 });
+    }
+
+    // 2. Map Shiprocket status to our internal status
+    // Common Shiprocket Statuses: 
+    // 6: Shipped, 7: Delivered, 8: Cancelled, 9: RTO Initiated, 10: RTO Delivered, 11: Pending, 12: Lost, 13: Pickup Scheduled
+    let internalStatus = order.status;
+    if (current_status_id === 7 || current_status?.toLowerCase() === 'delivered') {
+      internalStatus = 'delivered';
+    } else if (current_status_id === 6 || current_status?.toLowerCase() === 'shipped') {
+      internalStatus = 'shipped';
+    } else if (current_status_id === 8 || current_status?.toLowerCase() === 'cancelled') {
+      internalStatus = 'cancelled';
+    }
+
+    // 3. Update order status
+    await db.update(orders).set({
+      status: internalStatus,
+      updatedAt: new Date().toISOString(),
+    }).where(eq(orders.id, order.id));
+
+    // 4. Add tracking entry
+    await db.insert(orderTracking).values({
+      orderId: order.id,
+      status: current_status || 'Updated',
+      description: `Shipment status updated to ${current_status}`,
+      location: scanned_location || 'Transit',
+      createdAt: status_datetime || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('❌ Shiprocket Webhook Error:', error);
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
+    console.error('Webhook error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -6,63 +6,43 @@ import { eq, desc } from 'drizzle-orm';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const orderId = searchParams.get('order_id');
+    const orderId = searchParams.get('orderId') || searchParams.get('order_id');
 
     if (!orderId) {
-      return NextResponse.json({ 
-        error: 'Order ID is required', 
-        code: 'MISSING_ORDER_ID' 
-      }, { status: 400 });
+      return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
-    const orderIdNum = parseInt(orderId);
-    if (isNaN(orderIdNum)) {
-      return NextResponse.json({ 
-        error: 'Invalid Order ID format', 
-        code: 'INVALID_ORDER_ID' 
-      }, { status: 400 });
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, parseInt(orderId)),
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    const result = await db.select({
-      id: orders.id,
-      status: orders.status,
-      totalAmount: orders.totalAmount,
-      updatedAt: orders.updatedAt,
-      createdAt: orders.createdAt,
-    })
-    .from(orders)
-    .where(eq(orders.id, orderIdNum))
-    .limit(1);
-
-    if (result.length === 0) {
-      return NextResponse.json({ 
-        error: 'Order not found. Please check your Order ID.', 
-        code: 'ORDER_NOT_FOUND' 
-      }, { status: 404 });
-    }
-
-    const order = result[0];
-
-    // Fetch detailed tracking logs
-    const trackingLogs = await db.select()
-      .from(orderTracking)
-      .where(eq(orderTracking.orderId, order.id))
-      .orderBy(desc(orderTracking.createdAt));
+    const trackingHistory = await db.query.orderTracking.findMany({
+      where: eq(orderTracking.orderId, order.id),
+      orderBy: [desc(orderTracking.createdAt)],
+    });
 
     return NextResponse.json({
       orderId: order.id,
       status: order.status,
       amount: order.totalAmount,
+      trackingId: order.trackingId,
+      courierName: order.courierName,
       lastUpdated: order.updatedAt,
       placedAt: order.createdAt,
-      tracking: trackingLogs
-    }, { status: 200 });
-
+      tracking: trackingHistory.map(h => ({
+        id: h.id,
+        status: h.status,
+        description: h.description,
+        location: h.location,
+        createdAt: h.createdAt,
+      })),
+    });
   } catch (error) {
-    console.error('Tracking API error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error', 
-      code: 'INTERNAL_ERROR' 
-    }, { status: 500 });
+    console.error('Tracking fetch error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
