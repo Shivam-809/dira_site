@@ -141,6 +141,10 @@ export const orders = sqliteTable('orders', {
   shippingAddress: text('shipping_address', { mode: 'json' }),
   courierName: text('courier_name'),
   trackingId: text('tracking_id'),
+  shippingOrderId: text('shipping_order_id'),
+  shippingShipmentId: text('shipping_shipment_id'),
+  awbCode: text('awb_code'),
+  trackingUrl: text('tracking_url'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
