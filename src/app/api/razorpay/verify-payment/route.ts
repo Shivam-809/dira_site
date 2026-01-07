@@ -105,9 +105,6 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-    }
-
-
     } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
         courseId: data.courseId,
