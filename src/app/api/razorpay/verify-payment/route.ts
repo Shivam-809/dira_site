@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
       razorpayOrderId, 
       razorpayPaymentId, 
       razorpaySignature,
-      type, // 'service' or 'course'
-      data // booking or enrollment data
+      type,
+      data
     } = body;
 
     if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify signature
     const generatedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
@@ -49,7 +48,6 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Payment verified successfully:', razorpayPaymentId);
 
-    // Save to database based on type
     if (type === 'service') {
       await db.insert(serviceBookings).values({
         serviceId: data.serviceId,
@@ -68,7 +66,6 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       });
     } else if (type === 'order') {
-      // Create order
       const newOrder = await db.insert(orders).values({
         userId: data.userId,
         items: JSON.stringify(data.items),
@@ -80,10 +77,8 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       }).returning();
 
-      // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
 
-      // Send order confirmation email
       try {
         await sendEmail({
           to: data.shippingAddress.email || data.clientEmail,
@@ -105,9 +100,6 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Failed to send order email:', emailError);
       }
-    }
-
-
     } else if (type === 'course') {
       await db.insert(courseEnrollments).values({
         courseId: data.courseId,
@@ -123,7 +115,6 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       });
 
-      // Send confirmation email
       try {
         await sendEmail({
           to: data.clientEmail,
