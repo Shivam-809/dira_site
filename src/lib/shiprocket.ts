@@ -63,36 +63,38 @@ export async function createShiprocketOrder(orderId: number) {
     }
 
       // Prepare Shiprocket order data
-      const shiprocketOrderData = {
-        order_id: order.id.toString(),
-        order_date: new Date(order.createdAt).toISOString().split('T')[0],
-        pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
-        billing_customer_name: (shippingAddress.name || "Customer").split(' ')[0] || "Customer",
-        billing_last_name: (shippingAddress.name || "").split(' ').slice(1).join(' ') || "Customer",
-        billing_address: shippingAddress.address,
-        billing_city: shippingAddress.city,
-        billing_pincode: shippingAddress.pincode || shippingAddress.zip, // Fix for pincode/zip mismatch
-        billing_state: shippingAddress.state,
-        billing_country: shippingAddress.country || "India",
-        billing_email: shippingAddress.email || "customer@example.com",
-        billing_phone: (shippingAddress.phone || "").replace(/\D/g, '').slice(-10), // Ensure 10 digits
-        shipping_is_billing: true,
-        order_items: items.map((item: any) => ({
-          name: item.name,
-          sku: (item.sku || item.id || item.productId || Math.random().toString(36).substring(7)).toString(),
-          units: item.quantity,
-          selling_price: item.price,
-          discount: 0,
-          tax: 0,
-          hsn: ""
-        })),
-        payment_method: "Prepaid",
-        sub_total: order.totalAmount,
-        length: 10,
-        breadth: 10,
-        height: 10,
-        weight: 0.5
-      };
+        const shiprocketOrderData = {
+          order_id: order.id.toString(),
+          order_date: new Date(order.createdAt).toISOString().split('T')[0],
+          pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+          billing_customer_name: (shippingAddress.name || "Customer").split(' ')[0] || "Customer",
+          billing_last_name: (shippingAddress.name || "").split(' ').slice(1).join(' ') || "Customer",
+          billing_address: shippingAddress.address || shippingAddress.street || "Address not provided",
+          billing_address_2: shippingAddress.address2 || "",
+          billing_city: shippingAddress.city || "City not provided",
+          billing_pincode: shippingAddress.pincode || shippingAddress.zip || "000000",
+          billing_state: shippingAddress.state || "State not provided",
+          billing_country: shippingAddress.country || "India",
+          billing_email: shippingAddress.email || "customer@example.com",
+          billing_phone: (shippingAddress.phone || "").replace(/\D/g, '').slice(-10) || "0000000000",
+          shipping_is_billing: true,
+          is_test: process.env.SHIPROCKET_TEST_MODE === "true" ? 1 : 0,
+          order_items: items.map((item: any) => ({
+            name: item.name || "Product",
+            sku: (item.sku || item.id || item.productId || Math.random().toString(36).substring(7)).toString(),
+            units: item.quantity || 1,
+            selling_price: item.price || 0,
+            discount: 0,
+            tax: 0,
+            hsn: ""
+          })),
+          payment_method: "Prepaid",
+          sub_total: order.totalAmount,
+          length: 10,
+          breadth: 10,
+          height: 10,
+          weight: 0.5
+        };
 
       console.log(`📤 Sending order ${order.id} to Shiprocket...`);
 

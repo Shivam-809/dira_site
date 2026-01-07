@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (!order) {
-      console.warn(`Order not found for ID: ${order_id} or AWB: ${awb}`);
-      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+      console.warn(`Order not found for ID: ${order_id} or AWB: ${awb}. This might be a test webhook or an order from another source. Returning 200 OK.`);
+      return NextResponse.json({ message: "Order not found, but webhook acknowledged" }, { status: 200 });
     }
 
     // Update order status if it's not already cancelled or delivered (or as per business logic)

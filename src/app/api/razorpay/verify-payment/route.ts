@@ -84,13 +84,11 @@ export async function POST(request: NextRequest) {
         // Clear user's cart
         await db.delete(cart).where(eq(cart.userId, data.userId));
 
-        // Sync with Shiprocket
-        try {
-          console.log('🚀 Syncing order with Shiprocket:', newOrder[0].id);
-          await createShiprocketOrder(newOrder[0].id);
-        } catch (shiprocketError) {
-          console.error('Shiprocket sync failed:', shiprocketError);
-        }
+        // Sync with Shiprocket (non-blocking)
+        console.log('🚀 Initiating non-blocking Shiprocket sync for order:', newOrder[0].id);
+        createShiprocketOrder(newOrder[0].id).catch(shiprocketError => {
+          console.error('Shiprocket sync background task failed:', shiprocketError);
+        });
 
         // Send order confirmation email
       try {
