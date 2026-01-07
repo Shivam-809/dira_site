@@ -4,7 +4,6 @@ import { db } from '@/db';
 import { serviceBookings, courseEnrollments, orders, cart } from '@/db/schema';
 import { sendEmail } from '@/lib/email';
 import { eq } from 'drizzle-orm';
-import { createShiprocketOrder, assignCourierAndGenerateAWB } from '@/lib/shiprocket';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +12,8 @@ export async function POST(request: NextRequest) {
       razorpayOrderId, 
       razorpayPaymentId, 
       razorpaySignature,
-      type, // 'service', 'course', or 'order'
-      data // booking, enrollment, or order data
+      type, // 'service' or 'course'
+      data // booking or enrollment data
     } = body;
 
     if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
@@ -69,8 +68,8 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       });
     } else if (type === 'order') {
-      // Create order in DB
-      const [newOrder] = await db.insert(orders).values({
+      // Create order
+      const newOrder = await db.insert(orders).values({
         userId: data.userId,
         items: JSON.stringify(data.items),
         totalAmount: data.totalAmount,
@@ -80,64 +79,6 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }).returning();
-
-      // Shiprocket Integration
-      try {
-        const address = data.shippingAddress;
-        const nameParts = (address.name || 'Customer').split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '.';
-
-        const shiprocketOrder = await createShiprocketOrder({
-          order_id: newOrder.id.toString(),
-          order_date: new Date().toISOString().split('T')[0],
-          pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
-          billing_customer_name: firstName,
-          billing_last_name: lastName,
-          billing_address: address.address,
-          billing_city: address.city,
-          billing_pincode: address.pincode,
-          billing_state: address.state,
-          billing_country: 'India',
-          billing_email: address.email || data.clientEmail || 'customer@example.com',
-          billing_phone: address.phone || '0000000000',
-          shipping_is_billing: true,
-          order_items: data.items.map((item: any) => ({
-            name: item.name,
-            sku: `SKU-${item.id}`,
-            units: item.quantity,
-            selling_price: item.price,
-          })),
-          payment_method: 'Prepaid',
-          sub_total: data.totalAmount,
-          length: 10,
-          width: 10,
-          height: 10,
-          weight: 0.5,
-        });
-
-        const shipmentId = shiprocketOrder.shipment_id;
-        const srOrderId = shiprocketOrder.order_id;
-
-        // Automatically assign courier and generate AWB
-        const awbData = await assignCourierAndGenerateAWB(shipmentId);
-        
-        // Update order with Shiprocket details
-        await db.update(orders)
-          .set({
-            shiprocketOrderId: srOrderId.toString(),
-            shiprocketShipmentId: shipmentId.toString(),
-            awbCode: awbData.response.data.awb_code,
-            courierName: awbData.response.data.courier_name,
-            trackingUrl: `https://shiprocket.co/tracking/${awbData.response.data.awb_code}`,
-            updatedAt: new Date().toISOString(),
-          })
-          .where(eq(orders.id, newOrder.id));
-
-      } catch (srError) {
-        console.error('❌ Shiprocket automation failed:', srError);
-        // We don't fail the whole request because the order is already paid and saved in our DB
-      }
 
       // Clear user's cart
       await db.delete(cart).where(eq(cart.userId, data.userId));
@@ -151,7 +92,7 @@ export async function POST(request: NextRequest) {
             <div style="font-family: serif; padding: 20px; color: #1a1a1a;">
               <h1 style="color: #6b21a8;">Order Confirmed!</h1>
               <p>Hi ${data.shippingAddress.name},</p>
-              <p>Thank you for your purchase from Dira. Your order <strong>#${newOrder.id}</strong> has been received and is being processed.</p>
+              <p>Thank you for your purchase from Dira. Your order <strong>#${newOrder[0].id}</strong> has been received and is being processed.</p>
               <div style="background: #fdf6e3; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <p><strong>Total Amount:</strong> ₹${data.totalAmount}</p>
                 <p><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
