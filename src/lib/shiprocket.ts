@@ -62,59 +62,63 @@ export async function createShiprocketOrder(orderId: number) {
       return;
     }
 
-    // Prepare Shiprocket order data
-    const shiprocketOrderData = {
-      order_id: order.id.toString(),
-      order_date: new Date(order.createdAt).toISOString().split('T')[0],
-      pickup_location: "Primary", // Should match your Shiprocket setup
-      billing_customer_name: shippingAddress.name || "Customer",
-      billing_last_name: "",
-      billing_address: shippingAddress.address,
-      billing_city: shippingAddress.city,
-      billing_pincode: shippingAddress.pincode,
-      billing_state: shippingAddress.state,
-      billing_country: shippingAddress.country || "India",
-      billing_email: shippingAddress.email,
-      billing_phone: shippingAddress.phone,
-      shipping_is_billing: true,
-      order_items: items.map((item: any) => ({
-        name: item.name,
-        sku: (item.id || item.productId || Math.random().toString(36).substring(7)).toString(),
-        units: item.quantity,
-        selling_price: item.price,
-        discount: 0,
-        tax: 0,
-        hsn: ""
-      })),
-      payment_method: "Prepaid",
-      sub_total: order.totalAmount,
-      length: 10,
-      breadth: 10,
-      height: 10,
-      weight: 0.5
-    };
+      // Prepare Shiprocket order data
+      const shiprocketOrderData = {
+        order_id: order.id.toString(),
+        order_date: new Date(order.createdAt).toISOString().split('T')[0],
+        pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+        billing_customer_name: (shippingAddress.name || "Customer").split(' ')[0] || "Customer",
+        billing_last_name: (shippingAddress.name || "").split(' ').slice(1).join(' ') || "Customer",
+        billing_address: shippingAddress.address,
+        billing_city: shippingAddress.city,
+        billing_pincode: shippingAddress.pincode || shippingAddress.zip, // Fix for pincode/zip mismatch
+        billing_state: shippingAddress.state,
+        billing_country: shippingAddress.country || "India",
+        billing_email: shippingAddress.email || "customer@example.com",
+        billing_phone: (shippingAddress.phone || "").replace(/\D/g, '').slice(-10), // Ensure 10 digits
+        shipping_is_billing: true,
+        order_items: items.map((item: any) => ({
+          name: item.name,
+          sku: (item.sku || item.id || item.productId || Math.random().toString(36).substring(7)).toString(),
+          units: item.quantity,
+          selling_price: item.price,
+          discount: 0,
+          tax: 0,
+          hsn: ""
+        })),
+        payment_method: "Prepaid",
+        sub_total: order.totalAmount,
+        length: 10,
+        breadth: 10,
+        height: 10,
+        weight: 0.5
+      };
 
-    const response = await fetch(`${SHIPROCKET_API_URL}/orders/create/adhoc`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(shiprocketOrderData),
-    });
+      console.log(`📤 Sending order ${order.id} to Shiprocket...`);
 
-    const result = await response.json();
+      const response = await fetch(`${SHIPROCKET_API_URL}/orders/create/adhoc`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(shiprocketOrderData),
+      });
 
-    if (response.ok) {
-      console.log(`✅ Shiprocket order created: ${result.order_id}`);
-      // Update order with Shiprocket ID
-      await db.update(orders)
-        .set({ 
-          trackingId: result.shipment_id?.toString() || null,
-          courierName: result.courier_name || null,
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(orders.id, orderId));
+      const result = await response.json();
+
+      if (response.ok && result.order_id) {
+        console.log(`✅ Shiprocket order created: ${result.order_id}, Shipment ID: ${result.shipment_id}`);
+        // Update order with Shiprocket ID
+        await db.update(orders)
+          .set({ 
+            shiprocketOrderId: result.order_id.toString(),
+            shiprocketShipmentId: result.shipment_id?.toString() || null,
+            trackingId: result.shipment_id?.toString() || null, // AWB is usually generated later, but shipment_id is a good start
+            courierName: result.courier_name || null,
+            updatedAt: new Date().toISOString()
+          })
+          .where(eq(orders.id, orderId));
         
       // Log initial status
       await db.insert(orderTracking).values({

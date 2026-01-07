@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
 
     const {
       order_id,
+      shiprocket_order_id,
       awb,
       current_status,
       current_timestamp,
@@ -20,15 +21,22 @@ export async function POST(req: NextRequest) {
 
     let order;
 
-    // Fix for NaN error: check if order_id is a numeric string or number
-    const numericOrderId = order_id && !isNaN(parseInt(order_id)) ? parseInt(order_id) : null;
-
-    if (numericOrderId) {
+    // 1. Try matching by Shiprocket's order ID (sr_order_id or shiprocket_order_id)
+    const srOrderId = shiprocket_order_id || body.sr_order_id || order_id;
+    if (srOrderId) {
       order = await db.query.orders.findFirst({
-        where: eq(orders.id, numericOrderId),
+        where: eq(orders.shiprocketOrderId, srOrderId.toString()),
       });
     }
 
+    // 2. Try matching by our internal order ID if Shiprocket passed it back in order_id
+    if (!order && order_id && !isNaN(parseInt(order_id))) {
+      order = await db.query.orders.findFirst({
+        where: eq(orders.id, parseInt(order_id)),
+      });
+    }
+
+    // 3. Try matching by AWB
     if (!order && awb) {
       order = await db.query.orders.findFirst({
         where: eq(orders.trackingId, awb.toString()),
